@@ -4,7 +4,7 @@ These will be the open source Lua libraries for Powow. Of course, the end-user c
 install Powow, but these will be included by default to get started.
 
 So far, I only have a SoundCloud song implementation for
-[Wax](/probablycorey/wax), which is just a proof of concept. It will be completely rewritten for the framework.
+[Wax](http://github.com/probablycorey/wax), which is just a proof of concept. It will be completely rewritten for the framework.
 
 ## Implementation goal
 
