@@ -1,5 +1,7 @@
 waxClass{"SCSong", StreamSong}
 
+local API_KEY = "Your api key here"
+
 function initWithDictionary(self, dictionary)
     self.super:init()
     self:setDictionary(dictionary)
@@ -10,7 +12,7 @@ end
 function initWithIdentifier(self, identifier)
     self:initWithDictionary({})
     local songURL = "https://api.soundcloud.com/tracks/"..identifier..".json"
-    songURL = songURL.."?client_id=fda2ff71cabbaec14c8c26324f6c7aaf"
+    songURL = songURL.."?client_id="..API_KEY
     wax.http.request{songURL, callback = function(json, response)
         if response:statusCode() == 200 then
             self:setDictionary(json)
@@ -37,7 +39,7 @@ function setHTTPURL(self, streamURL)
         else
             streamString = streamString.."?"
         end
-        streamString = streamString.."client_id=fda2ff71cabbaec14c8c26324f6c7aaf"
+        streamString = streamString.."client_id="..API_KEY
         self:httpPlayer():fileSaver():setHTTPURL(NSURL:URLWithString(streamString))
     end
 end
