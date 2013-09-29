@@ -1,6 +1,9 @@
-# Powow Lua libraries
+# Official Powow Lua libraries
 
-These will be the open source Lua libraries for Powow. So far, I only have a SoundCloud song implementation for
+These will be the open source Lua libraries for Powow. Of course, the end-user can add any libraries they want once they
+install Powow, but these will be included by default to get started.
+
+So far, I only have a SoundCloud song implementation for
 Wax, which is just a proof of concept. It will be completely rewritten for the framework.
 
 ## Implementation goal
