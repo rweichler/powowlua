@@ -6,6 +6,8 @@ install Powow, but these will be included by default to get started.
 So far, I only have a SoundCloud song implementation for
 [Wax](http://github.com/probablycorey/wax), which is just a proof of concept. It will be completely rewritten for the framework.
 
+I also have some pseudocode for Google Music.
+
 ## Implementation goal
 
 ```bash
