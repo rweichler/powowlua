@@ -63,6 +63,7 @@ function LIBRARY:GetSongs()
         xt = self.session.cookies.xt
     }
 
+    --recursive fetch of all song info
     local function handle_data(response)
         if response then
             json = --get json from response
