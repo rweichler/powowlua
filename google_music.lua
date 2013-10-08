@@ -12,7 +12,7 @@ function LIBRARY:Login(email, password, callback)
         password = self.password
     end
 
-    assert(username)
+    assert(email)
     assert(password)
 
     local session = http.session:new()
