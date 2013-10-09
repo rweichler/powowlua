@@ -1,0 +1,2 @@
+json = continuation, playlistId, playlist, requestTime, differentialUpdate, 
+json.playlist[1] = artistMatchedId, matchedId, totalDiscs, name, curatedByUser, id, albumNorm, titleNorm, title, track, deleted, subjectToCuration, artistImageBaseUrl, comment, type, recentTimestamp, disc, genre, albumArtist, creationDate, lastPlayed, beatsPerMinute, playCount, origin, albumMatchedId, durationMillis, year, albumArtUrl, totalTracks, storeId, rating, artistNorm, composer, album, curationSuggested, artist, url, bitrate, albumArtistNorm, 
