@@ -1,3 +1,4 @@
+local json = dofile("json.lua")
 
 function LIBRARY:Login(email, password, callback)
     if type(email) == "function" then
@@ -28,13 +29,12 @@ function LIBRARY:Login(email, password, callback)
     local url = "https://google.com/accounts/ClientLogin"
 
     session:post(url, params, function(response)
-        local auth = --do regex to get Auth here
+        local auth = string.match(response.body, "\nAuth=(%g+)\n")
         session.headers['Authorization'] = "GoogleLogin auth="..auth
 
         local url = "https://play.google.com/music/listen"
         session:head(url, {}, function(response)
             session.cookies.xt = response.cookies.xt
-            session.cookies.sjsaid = response.cookies.sjsaid
 
             --WE DONE
 
@@ -66,12 +66,14 @@ function LIBRARY:GetSongs()
     --recursive fetch of all song info
     local function handle_data(response)
         if response then
-            json = --get json from response
+            json = json:decode(response.body)
             --append the song info somewhere
 
             if json.continuationToken then
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
+                print("got "..string.len(response.body).." bytes")
             else
+                print("done")
                 return --if there's no continuation token, then we're done
             end
         end
