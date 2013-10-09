@@ -29,7 +29,7 @@ function LIBRARY:Login(email, password, callback)
 
     session:post(url, params, function(response)
         local auth = --do regex to get Auth here
-        session.headers.Authorization = "GoogleLogin auth="..auth
+        session.headers['Authorization'] = "GoogleLogin auth="..auth
 
         local url = "https://play.google.com/music/listen"
         session:head(url, {}, function(response)
@@ -70,7 +70,7 @@ function LIBRARY:GetSongs()
             --append the song info somewhere
 
             if json.continuationToken then
-                params.continuationToken = json.continuationToken
+                params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
             else
                 return --if there's no continuation token, then we're done
             end
