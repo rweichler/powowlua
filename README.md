@@ -10,7 +10,7 @@ I also have some pseudocode for Google Music.
 
 ## Implementation goal
 
-Tick off everything on [this list](http://blog.programmableweb.com/2012/01/18/160-music-apis/).
+Tick off everything on [this list](http://www.programmableweb.com/apitag/music).
 
 ```bash
 >>> ls
