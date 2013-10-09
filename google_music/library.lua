@@ -15,6 +15,7 @@ function LIBRARY:Login(email, password, callback)
 
     assert(email)
     assert(password)
+    assert(not response or type(response) == 'function')
 
     local session = http.session:new()
 
@@ -29,6 +30,15 @@ function LIBRARY:Login(email, password, callback)
     local url = "https://google.com/accounts/ClientLogin"
 
     session:post(url, params, function(response)
+        --wrong credentials
+        if response.status ~= 200 then
+            if callback then
+                callback(response.status)
+            end
+            return response.status
+        end
+
+        --get auth token
         local auth = string.match(response.body, "\nAuth=(%g+)\n")
         session.headers['Authorization'] = "GoogleLogin auth="..auth
 
@@ -42,7 +52,8 @@ function LIBRARY:Login(email, password, callback)
             self.session = session
 
             if callback then
-                callback()
+                callback(200)
+                return 200
             end
         end)
 
@@ -51,8 +62,10 @@ end
 
 function LIBRARY:GetSongs()
     if not self.logged_in then
-        self:Login(function()
-            self:GetSongs()
+        self:Login(function(status)
+            if status == 200 then
+                self:GetSongs()
+            end
         end)
         return
     end
