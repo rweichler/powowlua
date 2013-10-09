@@ -1,4 +1,4 @@
-local json = dofile("json.lua")
+local JSON = dofile("json.lua")
 
 function LIBRARY:Login(email, password, callback)
     if type(email) == "function" then
@@ -44,7 +44,9 @@ function LIBRARY:Login(email, password, callback)
 
         local url = "https://play.google.com/music/listen"
         session:head(url, {}, function(response)
+            --have to manually set the session cookies in order to preserve them HELLA SECURE
             session.cookies.xt = response.cookies.xt
+            session.cookies.sjsaid = response.cookies.sjsaid
 
             --WE DONE
 
@@ -79,7 +81,7 @@ function LIBRARY:GetSongs()
     --recursive fetch of all song info
     local function handle_data(response)
         if response then
-            json = json:decode(response.body)
+            local json = JSON:decode(response.body)
             --append the song info somewhere
 
             if json.continuationToken then
@@ -94,4 +96,18 @@ function LIBRARY:GetSongs()
     end
 
     handle_data()
+end
+
+function LIBRARY:GetSongUrl(id)
+    local url = "https://play.google.com/music/play"
+    local params = {
+        songid = id,
+        u = 0,
+        pt = 'e',
+    }
+    self.session:get(url, params, function(response)
+        local json = JSON:decode(response.body)
+        print(json.url) --copy paste this shit and it'll download dat shit, breh
+    end)
+
 end
