@@ -4,6 +4,8 @@ local http = {}
 local session = {}
 http.session = session
 
+session.MALFORMED_RESPONSE = 23894 --random ass number
+
 function session:new(o)
     o = o or {}
     setmetatable(o, self)
