@@ -10,9 +10,9 @@ LIB.short_title = "GMusic"
 LIB.icon = "gmusic_icon@2x.png"
 
 LIB.directory_names = {
-    "directory_songs"
+    "gmusic_songs"
 }
-LIB.song_name = "song"
+LIB.song_name = "googlemusic_song"
 
 LIB.requires_login = true
 LIB.num_login_fields = 2
@@ -195,6 +195,25 @@ function LIB:GetSongs(callback)
     handle_data()
 end
 
+local function unescape(s)
+    s = string.gsub(s, "+", " ")
+    s = string.gsub(s, "%%(%x%x))", function(h)
+        return string.char(tonumber(h, 16))
+    end)
+    return s
+end
+
+local function decode(s)
+    local cgi = {}
+    for name, value in string.gmatch(s, "([^&=]+)=([^&=]+)") do
+        name = unescape(name)
+        value = unescape(value)
+        cgi[name] = value
+    end
+    return cgi
+end
+
+
 function LIB:GetSongUrl(id, callback)
     assert(id and type(id) == "string")
     assert(callback and type(callback) == "function")
@@ -236,7 +255,26 @@ function LIB:GetSongUrl(id, callback)
             callback(response)
         elseif is_all_access then
             local json = JSON:decode(response.body)
-            callback(json.urls)
+            local result = {}
+            local prev_end = 0
+            for k,v in pairs(json.urls) do
+
+                local decoded = decode(v)
+
+                local start, this_end = string.match(decoded['range'], "(%d+)-(%d+)")
+
+                start = prev_end - start
+                
+                local dict = {
+                    start = start,
+                    url = v
+                }
+                table.insert(result, dict)
+                
+                prev_end = this_end + 1
+            end
+
+            callback(result)
         else
             local json = JSON:decode(response.body)
             callback(json.url)
