@@ -106,8 +106,6 @@ function LIB:Login(email, password, callback)
 end
 
 function LIB:Search(query, max_results, callback)
-    print("IT'S HAPPENING")
-
 
     if not callback and type(max_results) == "function" then
         callback = max_results
@@ -196,98 +194,4 @@ function LIB:GetSongs(callback)
     handle_data()
 end
 
-local function unescape(s)
-    s = string.gsub(s, "+", " ")
-    s = string.gsub(s, "%%(%x%x))", function(h)
-        return string.char(tonumber(h, 16))
-    end)
-    return s
-end
 
-local function decode(s)
-    local cgi = {}
-    for name, value in string.gmatch(s, "([^&=]+)=([^&=]+)") do
-        name = unescape(name)
-        value = unescape(value)
-        cgi[name] = value
-    end
-    return cgi
-end
-
-
-function LIB:GetSongUrl(id, callback)
-
-
-    assert(type(id) == "string")
-    assert(type(callback) == "function")
-
-
-    if not self.logged_in then
-        self:Login(function(status)
-            if status == 200 then
-                self:GetSongUrl(id, callback)
-            end
-        end)
-        return
-    end
-
-    local is_all_access = string.sub(id, 1, 1) == 'T'
-
-    local url = "https://play.google.com/music/play"
-    local params = {
-        --random ass parameters you gotta set for some reason
-        u = 0,
-        pt = 'e',
-    }
-    if is_all_access then
-        params['mjck'] = id
-
-        --needa generate hashes
-        local key = '27f7313e-f75d-445a-ac99-56386a5fe879'
-        local salt = 'djvk4idpqo93' --this should be a random string of characters but im too lazy
-
-        local sig = hmac_sha1_64(key, id..salt) --I CHEATED: implemented this in C
-        sig = string.sub(sig, 1, #sig - 1) --get rid of = at the end
-        --weird shit
-        sig = string.gsub(sig, "[+|/]", function(char)
-            if char == "+" then return "-" end
-            if char == "/" then return "_" end
-        end)
-
-        params['slt'] = salt
-        params['sig'] = sig
-    else
-        params['songid'] = id
-    end
-    self.session:get(url, params, function(response)
-        if response.failed then
-            callback(response)
-        elseif is_all_access then
-            local json = JSON:decode(response.body)
-            local result = {}
-            local prev_end = 0
-            for k,v in pairs(json.urls) do
-
-                local decoded = decode(v)
-
-                local start, this_end = string.match(decoded['range'], "(%d+)-(%d+)")
-
-                start = prev_end - start
-                
-                local dict = {
-                    start = start,
-                    url = v
-                }
-                table.insert(result, dict)
-                
-                prev_end = this_end + 1
-            end
-
-            callback(result)
-        else
-            local json = JSON:decode(response.body)
-            callback(json.url)
-        end
-    end)
-
-end
