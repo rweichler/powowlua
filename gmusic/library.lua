@@ -2,7 +2,7 @@
 --https://github.com/simon-weber/Unofficial-Google-Music-API/
 
 local JSON = dofile(bundle_path.."json.lua")
-dofile(bundle_path.."sha.lua")
+--dofile(bundle_path.."sha.lua")
 
 LIB.class = "gmusic"
 LIB.title = "Google Music"
@@ -46,9 +46,9 @@ function LIB:Login(email, password, callback)
         password = self.password
     end
 
-    assert(email and type(email) == "string")
-    assert(password and type(password) == "string")
-    assert(not response or type(response) == 'function')
+    assert(type(email) == "string")
+    assert(type(password) == "string")
+    assert(not callback or type(callback) == 'function')
 
     self.email = email
     self.password = password
@@ -215,8 +215,10 @@ end
 
 
 function LIB:GetSongUrl(id, callback)
-    assert(id and type(id) == "string")
-    assert(callback and type(callback) == "function")
+
+
+    assert(type(id) == "string")
+    assert(type(callback) == "function")
 
 
     if not self.logged_in then
@@ -241,9 +243,15 @@ function LIB:GetSongUrl(id, callback)
 
         --needa generate hashes
         local key = '27f7313e-f75d-445a-ac99-56386a5fe879'
-        local salt = 'djvk4idpqo93'
-        local sig = hmac_sha1_64(key, id..salt) --hash that shit
+        local salt = 'djvk4idpqo93' --this should be a random string of characters but im too lazy
+
+        local sig = hmac_sha1_64(key, id..salt) --I CHEATED: implemented this in C
         sig = string.sub(sig, 1, #sig - 1) --get rid of = at the end
+        --weird shit
+        sig = string.gsub(sig, "[+|/]", function(char)
+            if char == "+" then return "-" end
+            if char == "/" then return "_" end
+        end)
 
         params['slt'] = salt
         params['sig'] = sig
