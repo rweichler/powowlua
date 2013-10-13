@@ -4,7 +4,7 @@ lib.class = "base"
 
 lib.title = "Library"
 lib.short_title = lib.title
-lib.icon = nil
+lib.icon = "icon.png"
 lib.requires_login = false
 lib.num_login_fields = 0
 lib.song = nil
@@ -24,6 +24,8 @@ function lib:new(o)
         for k,v in pairs(SONG) do
             song[k] = v
         end
+        song.class = o.class
+        song.library = o
         o.song = song
     end
 

@@ -10,7 +10,6 @@ local JSON = dofile(bundle_path.."libs/json.lua")
 
 LIB.title = "SoundCloud"
 LIB.short_title = "SCloud"
-LIB.icon = "soundcloud_icon@2x.png"
 
 function LIB:Search(query, callback)
 

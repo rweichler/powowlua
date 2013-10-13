@@ -99,7 +99,13 @@ function SONG:StreamURL(callback)
                 prev_end = this_end + 1
             end
 
-            callback(result)
+
+
+            local properties = {
+                size = string.match(decode(json.urls[#json.urls])['range'], "-(%d+)") + 1,
+            }
+
+            callback(result, properties)
         else
             local json = JSON:decode(response.body)
             callback(json.url)

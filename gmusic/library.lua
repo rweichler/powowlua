@@ -6,7 +6,6 @@ local JSON = dofile(bundle_path.."libs/json.lua")
 
 LIB.title = "Google Music"
 LIB.short_title = "GMusic"
-LIB.icon = "gmusic_icon@2x.png"
 
 LIB.directory_names = {
     "directory_songs"
@@ -131,7 +130,6 @@ function LIB:Search(query, max_results, callback)
                 if v.track then
                     local song = self.song:new()
                     song:SetInfo(v.track)
-                    song.library = self
                     table.insert(songs, song)
                 end
             end
