@@ -1,3 +1,8 @@
+local path = bundle_path.."soundcloud/key.lua"
+if not io.open(path) and not private_key then
+    error('soundcloud private key missing (put "return \'KEY_HERE\'" in key.lua)')
+end
+local private_key = dofile(path) or private_key
 
 SONG.can_cache = true
 
@@ -6,7 +11,7 @@ function SONG:ID()
 end
 
 function SONG:StreamURL(callback)
-    callback(self.info.stream_url)
+    callback(self.info.stream_url.."?client_id="..private_key)
 end
 
 function SONG:ArtworkURL(callback)
@@ -17,7 +22,8 @@ function SONG:ArtworkURL(callback)
 
     url = url or self.info.user.avatar_url
     if not string.find(url, "default_avatar") then
-        callback(string.gsub(url, "large", "t500x500"))
+        url = string.gsub(url, "large", "t500x500")
+        callback(url)
     end
 end
 

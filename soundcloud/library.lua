@@ -10,6 +10,7 @@ local JSON = dofile(bundle_path.."libs/json.lua")
 
 LIB.title = "SoundCloud"
 LIB.short_title = "SCloud"
+LIB.color = {255, 77, 25}
 
 function LIB:Search(query, callback)
 
@@ -18,8 +19,10 @@ function LIB:Search(query, callback)
         q = query,
         client_id = private_key,
     }
-
-    http:get(url, params, function(result)
+    if not self.session then
+        self.session = http.session:new()
+    end
+    self.session:get(url, params, function(result)
         if result.failed then
             callback(false, "idk", result)
             return
