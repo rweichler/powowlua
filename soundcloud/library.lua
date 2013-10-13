@@ -16,15 +16,15 @@ function LIB:Search(query, callback)
 
     local url = 'https://api.soundcloud.com/tracks.json'
     local params = {
-    	q = query,
-    	client_id = private_key,
-	}
+        q = query,
+        client_id = private_key,
+    }
 
-	http:get(url, params, function(result)
-		if result.failed then
-			callback(false, "idk", result)
-			return
-		end
+    http:get(url, params, function(result)
+        if result.failed then
+            callback(false, "idk", result)
+            return
+        end
 
         local json = JSON:decode(result.body)
         local songs = {}
@@ -37,6 +37,6 @@ function LIB:Search(query, callback)
             end
         end
         callback(songs)
-	end)
+    end)
 
 end
