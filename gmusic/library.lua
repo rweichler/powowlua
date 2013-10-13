@@ -1,18 +1,16 @@
 --SHOUT OUT TO SIMON WEBER FOR MAKING THE BEST GOOGLE MUSIC API EVER (which is what this is based on)
 --https://github.com/simon-weber/Unofficial-Google-Music-API/
 
-local JSON = dofile(bundle_path.."json.lua")
+local JSON = dofile(bundle_path.."libs/json.lua")
 --dofile(bundle_path.."sha.lua")
 
-LIB.class = "gmusic"
 LIB.title = "Google Music"
 LIB.short_title = "GMusic"
 LIB.icon = "gmusic_icon@2x.png"
 
 LIB.directory_names = {
-    "gmusic_songs"
+    "directory_songs"
 }
-LIB.song_name = "googlemusic_song"
 
 LIB.requires_login = true
 LIB.num_login_fields = 2
@@ -108,6 +106,9 @@ function LIB:Login(email, password, callback)
 end
 
 function LIB:Search(query, max_results, callback)
+    print("IT'S HAPPENING")
+
+
     if not callback and type(max_results) == "function" then
         callback = max_results
         max_results = 20

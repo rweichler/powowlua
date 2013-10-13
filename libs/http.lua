@@ -41,4 +41,19 @@ function session:delete(...)
     return self:request("DELETE", ...)
 end
 
+local hidden_session = session:new()
+
+for k,v in pairs(hidden_session) do
+    if k ~= "new" and type(v) == "function" then
+        http[k] = function(self, ...)
+            return v(hidden_session, ...)
+        end
+    end
+end
+
+
+
+
+
+
 return http

@@ -9,7 +9,7 @@ lib.requires_login = false
 lib.num_login_fields = 0
 lib.song = nil
 
-lib.directory_names = nil
+--lib.directory_names = nil
 
 function lib:new(o)
     o = o or {}
@@ -17,10 +17,10 @@ function lib:new(o)
     self.__index = self
 
     o.directories = {}
-    if o.song_name then
-        local song = dofile(bundle_path.."song.lua")
+    if o.class then
+        local song = dofile(bundle_path.."base/song.lua")
         SONG = {}
-        dofile(bundle_path..o.song_name..".lua")
+        dofile(bundle_path..o.class.."/song.lua")
         for k,v in pairs(SONG) do
             song[k] = v
         end
