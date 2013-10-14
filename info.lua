@@ -1,4 +1,4 @@
 return {
-    "gmusic",
     "soundcloud",
+    "gmusic",
 }

@@ -6,7 +6,7 @@ local JSON = dofile(bundle_path.."libs/json.lua")
 
 LIB.title = "Google Music"
 LIB.short_title = "GMusic"
-LIB.color = {255,0,0}
+LIB.color = {255,0,255}
 
 LIB.directory_names = {
     "directory_songs"

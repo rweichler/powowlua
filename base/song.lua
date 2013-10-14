@@ -3,7 +3,7 @@ song.type = "song"
 song.class = "base"
 
 song.can_cache = false
-
+song.filetype = "mp3"
 song.library = nil
 
 function song:new(o)
