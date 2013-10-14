@@ -5,6 +5,7 @@ DIR.title = "Songs"
 DIR.icon = "BarSongs.png"
 
 function DIR:init(songs)
+    local start = os.clock()
     --alphabetize that shit
     table.sort(songs, function(a, b)
         return a.titleNorm < b.titleNorm
@@ -18,5 +19,8 @@ function DIR:init(songs)
         song.library = self.library
         table.insert(result, song)
     end
+
+    NSLog("directory_songs.lua took "..(os.clock() - start).." seconds")
+
     return result
 end

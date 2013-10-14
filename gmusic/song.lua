@@ -1,5 +1,3 @@
-local JSON = dofile(bundle_path.."libs/json.lua")
-
 SONG.can_cache = true
 
 function SONG:ID()
@@ -80,7 +78,7 @@ function SONG:StreamURL(callback)
         if response.failed then
             callback(nil, response)
         elseif is_all_access then
-            local json = JSON:decode(response.body)
+            local json = http.json.decode(response.body)
             local result = {}
             local prev_end = 0
             for k,v in pairs(json.urls) do
@@ -107,7 +105,7 @@ function SONG:StreamURL(callback)
 
             callback(result, properties)
         else
-            local json = JSON:decode(response.body)
+            local json = http.json.decode(response.body)
             callback(json.url)
         end
     end)

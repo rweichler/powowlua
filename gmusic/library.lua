@@ -1,7 +1,6 @@
 --SHOUT OUT TO SIMON WEBER FOR MAKING THE BEST GOOGLE MUSIC API EVER (which is what this is based on)
 --https://github.com/simon-weber/Unofficial-Google-Music-API/
 
-local JSON = dofile(bundle_path.."libs/json.lua")
 --dofile(bundle_path.."sha.lua")
 
 LIB.title = "Google Music"
@@ -124,7 +123,7 @@ function LIB:Search(query, max_results, callback)
         if result.failed or result.status ~= 200 then
             callback(false, result)
         else
-            local json = JSON:decode(result.body)
+            local json = http.json.decode(result.body)
             local entries = json.entries
             local songs = {}
             for k,v in pairs(entries) do
@@ -168,7 +167,9 @@ function LIB:GetSongs(callback)
                 callback(response.status)
                 return
             end
-            local json = JSON:decode(response.body)
+            local start = os.clock()
+            local json = http.json.decode(response.body)
+            NSLog("http.json.decode took"..(os.clock()-start).." seconds")
             if not type(json) == "table" or not type(json.playlist) == "table" then
                 callback(http.session.MALFORMED_RESPONSE)
             end

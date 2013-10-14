@@ -6,8 +6,6 @@ local private_key = dofile(path) or private_key
 
 --actual class
 
-local JSON = dofile(bundle_path.."libs/json.lua")
-
 LIB.title = "SoundCloud"
 LIB.short_title = "SCloud"
 LIB.color = {255, 77, 25}
@@ -28,7 +26,7 @@ function LIB:Search(query, callback)
             return
         end
 
-        local json = JSON:decode(result.body)
+        local json = http.json.decode(result.body)
         local songs = {}
         for k,v in pairs(json) do
             if v.streamable then
