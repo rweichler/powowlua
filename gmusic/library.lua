@@ -125,15 +125,19 @@ function LIB:Search(query, max_results, callback)
         else
             local json = http.json.decode(result.body)
             local entries = json.entries
-            local songs = {}
-            for k,v in pairs(entries) do
-                if v.track then
-                    local song = self.song:new()
-                    song:SetInfo(v.track)
-                    table.insert(songs, song)
+            if entries ~= nil then
+                local songs = {}
+                for k,v in pairs(entries) do
+                    if v.track then
+                        local song = self.song:new()
+                        song:SetInfo(v.track)
+                        table.insert(songs, song)
+                    end
                 end
+                callback (songs)
+            else
+                callback({})
             end
-            callback(songs)
         end
     end)
 end

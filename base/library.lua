@@ -18,7 +18,7 @@ function lib:new(o)
     setmetatable(o, self)
     self.__index = self
 
-    o.directories = {}
+    --o.directories = {}
     if o.class then
         local song = dofile(bundle_path.."base/song.lua")
         SONG = {}
