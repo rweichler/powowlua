@@ -9,19 +9,9 @@ function SONG:ID()
     return nil
 end
 
-local function unescape(s)
-    s = string.gsub(s, "+", " ")
-    s = string.gsub(s, "%%(%x%x))", function(h)
-        return string.char(tonumber(h, 16))
-    end)
-    return s
-end
-
 local function decode(s)
     local cgi = {}
     for name, value in string.gmatch(s, "([^&=]+)=([^&=]+)") do
-        name = unescape(name)
-        value = unescape(value)
         cgi[name] = value
     end
     return cgi
@@ -30,8 +20,8 @@ end
 function SONG:StreamURL(callback)
 
     if not self.library.logged_in then
-        self.library:Login(function(status)
-            if status == 200 then
+        self.library:Login(function(success)
+            if success then
                 self:StreamURL(callback)
             end
         end)
@@ -59,7 +49,7 @@ function SONG:StreamURL(callback)
         local key = '27f7313e-f75d-445a-ac99-56386a5fe879'
         local salt = 'djvk4idpqo93' --this should be a random string of characters but im too lazy
 
-        local sig = hmac_sha1_64(key, id..salt) --I CHEATED: implemented this in C
+        local sig = hmac_sha1_64(key, id..salt) --I CHEATED: implemented this in C (if you need something like this, email rweichler@gmail.com)
         sig = string.sub(sig, 1, #sig - 1) --get rid of = at the end
         --weird shit
         sig = string.gsub(sig, "[+|/]", function(char)
@@ -101,6 +91,7 @@ function SONG:StreamURL(callback)
 
             local properties = {
                 size = string.match(decode(json.urls[#json.urls])['range'], "-(%d+)") + 1,
+                expire_time = 30,
             }
 
             callback(result, properties)

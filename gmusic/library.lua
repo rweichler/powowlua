@@ -148,8 +148,8 @@ function LIB:GetSongs(callback)
     end
     assert(type(callback) == "function")
     if not self.logged_in then
-        self:Login(function(status)
-            if status == 200 then
+        self:Login(function(success)
+            if success then
                 self:GetSongs(callback)
             end
         end)
