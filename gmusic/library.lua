@@ -1,8 +1,6 @@
 --SHOUT OUT TO SIMON WEBER FOR MAKING THE BEST GOOGLE MUSIC API EVER (which is what this is based on)
 --https://github.com/simon-weber/Unofficial-Google-Music-API/
 
---dofile(bundle_path.."sha.lua")
-
 LIB.title = "Google Music"
 LIB.short_title = "GMusic"
 LIB.color = {255,0,255}
@@ -63,21 +61,22 @@ function LIB:Login(email, password, callback)
     local url = "https://google.com/accounts/ClientLogin"
 
     session:post(url, params, function(response)
-        --wrong credentials
+        --timeout/wrong credentials
         if response.status ~= 200 then
             if callback then
-                callback(false, callback.status, "Wrong Credentials")
+                callback(false, response.status, "can't get auth token")
             end
             return
         end
 
         --get auth token
         local auth = string.match(response.body, "\nAuth=(%g+)\n")
+        --set the headers for every subsequent session.request
         session.headers['Authorization'] = "GoogleLogin auth="..auth
 
         local url = "https://play.google.com/music/listen"
         --normally we would use get, but we don't need all the HTML crap. head saves some bandwidth
-        --if this thing breaks, try changing head to get as a first resort
+        --if this thing breaks, try changing 'head' to 'get' as a first resort
         session:head(url, {}, function(response)
             if response.status ~= 200 then
                 if callback then
@@ -85,15 +84,15 @@ function LIB:Login(email, password, callback)
                 end
                 return
             end
-            --xt is used for getting library info
-            session.cookies.xt = response.cookies.xt
-            --sjsaid is for getting the actual music
-            session.cookies.sjsaid = response.cookies.sjsaid
+
+            --set the cookies for every subsequent session.request
+            session.cookies.xt = response.cookies.xt --used for getting library info
+            session.cookies.sjsaid = response.cookies.sjsaid --used for getting the actual music
 
             --WE DONE
 
             self.logged_in = true
-            self.session = session
+            self.session = session --needa save the session for other shit
 
             if callback then
                 callback(true, response.status)
@@ -108,7 +107,7 @@ function LIB:Search(query, max_results, callback)
 
     if not callback and type(max_results) == "function" then
         callback = max_results
-        max_results = 20
+        max_results = 30
     end
 
 
@@ -124,20 +123,17 @@ function LIB:Search(query, max_results, callback)
             callback(false, result)
         else
             local json = http.json.decode(result.body)
-            local entries = json.entries
-            if entries ~= nil then
-                local songs = {}
-                for k,v in pairs(entries) do
+            local songs = {}
+            if json.entries ~= nil then
+                for k,v in pairs(json.entries) do
                     if v.track then
                         local song = self.song:new()
                         song:SetInfo(v.track)
                         table.insert(songs, song)
                     end
                 end
-                callback (songs)
-            else
-                callback({})
             end
+            callback(songs)
         end
     end)
 end

@@ -49,7 +49,7 @@ function SONG:StreamURL(callback)
         local key = '27f7313e-f75d-445a-ac99-56386a5fe879'
         local salt = 'djvk4idpqo93' --this should be a random string of characters but im too lazy
 
-        local sig = hmac_sha1_64(key, id..salt) --I CHEATED: implemented this in C (if you need something like this, email rweichler@gmail.com)
+        local sig = hmac_sha1_64(key, id..salt) --I CHEATED: implemented this in C for speed (if you need something like this, email rweichler@gmail.com and i will implement it in C for you if it is reasonable)
         sig = string.sub(sig, 1, #sig - 1) --get rid of = at the end
         --weird shit
         sig = string.gsub(sig, "[+|/]", function(char)
@@ -103,10 +103,15 @@ function SONG:StreamURL(callback)
 end
 
 function SONG:ArtworkURL(callback)
+    if not type(self.info) == "table" then
+        callback(nil)
+        return
+    end
+
     local url
-    if self.info.albumArtUrl then
+    if type(self.info.albumArtUrl) == "string" then
         url = "http:"..string.gsub(self.info.albumArtUrl, "s130", "s640")
-    elseif type(self.info.albumArtRef) == "table" and #self.info.albumArtRef > 0 then
+    elseif type(self.info.albumArtRef) == "table" and type(self.info.albumArtRef[1]) == "table" then
         url = self.info.albumArtRef[1].url
     end
     callback(url)
