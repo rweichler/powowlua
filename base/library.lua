@@ -9,7 +9,7 @@ lib.requires_login = false
 lib.num_login_fields = 0
 lib.song = nil
 lib.color = {0,0,0}
-lib.background_color = {255,255,255}
+lib.background_color = {0,0,0}
 
 --lib.directory_names = nil
 

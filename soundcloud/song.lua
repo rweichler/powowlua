@@ -16,10 +16,9 @@ end
 
 function SONG:ArtworkURL(callback)
     local url
-    if self.info.artwork_url then
+    if type(self.info.artwork_url) == "string" then
         url = self.info.artwork_url
     end
-
     url = url or self.info.user.avatar_url
     if not string.find(url, "default_avatar") then
         url = string.gsub(url, "large", "t500x500")
