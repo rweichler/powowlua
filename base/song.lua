@@ -36,18 +36,6 @@ function song:ArtworkURL(callback)
     end
 end
 
-function song:Title()
-    return self.info.title
-end
-
-function song:Artist()
-    return self.info.artist
-end
-
-function song:Album()
-    return self.info.album
-end
-
 function song:Serialize()
     return self.info
 end

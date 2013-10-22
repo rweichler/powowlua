@@ -17,6 +17,13 @@ local function decode(s)
     return cgi
 end
 
+function SONG:SetInfo(info)
+    self.info = info
+    self.artist = info.artist
+    self.title = info.title
+    self.album = info.album
+end
+
 function SONG:StreamURL(callback)
 
     if not self.library.logged_in then

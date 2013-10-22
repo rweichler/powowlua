@@ -26,14 +26,9 @@ function SONG:ArtworkURL(callback)
     end
 end
 
-function SONG:Title()
-    return self.info.title
-end
-
-function SONG:Artist()
-    return self.info.user.username
-end
-
-function SONG:Album()
-    return "SoundCloud"
+function SONG:SetInfo(info)
+    self.info = info
+    self.title = info.title
+    self.artist = info.user.username
+    self.album = "SoundCloud"
 end
