@@ -16,10 +16,6 @@ function song:new(o)
     return o
 end
 
-function song:ID()
-    return self.info.id
-end
-
 function song:SetInfo(info)
     self.info = info
 end

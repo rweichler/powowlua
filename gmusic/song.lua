@@ -1,14 +1,5 @@
 SONG.can_cache = true
 
-function SONG:ID()
-    if self.info.id then
-        return self.info.id
-    elseif self.info.nid then
-        return self.info.nid
-    end
-    return nil
-end
-
 local function decode(s)
     local cgi = {}
     for name, value in string.gmatch(s, "([^&=]+)=([^&=]+)") do
@@ -22,6 +13,11 @@ function SONG:SetInfo(info)
     self.artist = info.artist
     self.title = info.title
     self.album = info.album
+    if info.id then
+        self.id = info.id
+    elseif info.nid then
+        self.id = info.nid
+    end
 end
 
 function SONG:StreamURL(callback)
@@ -35,7 +31,7 @@ function SONG:StreamURL(callback)
         return
     end
 
-    local id = self:ID()
+    local id = self.id
     if not id then
         callback(nil, "error getting stream URL")
         return
