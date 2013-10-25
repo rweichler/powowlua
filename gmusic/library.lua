@@ -6,11 +6,12 @@ LIB.short_title = "GMusic"
 LIB.color = {255,0,255}
 
 LIB.directory_order = {
-    "songs"
+    "songs",
 }
 
 LIB.search_order = {
-    "songs"
+    "songs",
+    "albums",
 }
 
 LIB.requires_login = true
@@ -107,10 +108,12 @@ function LIB:Login(email, password, callback)
     end)
 end
 
+LIB.sj_url = "https://www.googleapis.com/sj/v1.1/"
+
 function LIB:Search(query, callback, index)
     local search = self.searches[index]
 
-    local url = "https://www.googleapis.com/sj/v1.1/query"
+    local url = self.sj_url.."query"
 
     local params = {
         q = query
@@ -122,11 +125,11 @@ function LIB:Search(query, callback, index)
             callback(false, result)
         else
             local json = http.json.decode(result.body)
-            local songs
             if json.entries ~= nil then
-                songs = search:Filter(json.entries)
+                search:Filter(json.entries, callback)
+            else
+                callback({})
             end
-            callback(songs or {})
         end
     end)
 

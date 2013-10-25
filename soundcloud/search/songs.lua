@@ -28,7 +28,7 @@ function SEARCH:Search(query, callback)
         local songs = {}
         for k,v in pairs(json) do
             if v.streamable then
-                local song = self.libary.song:new()
+                local song = self.library.song:new()
                 song:SetInfo(v)
                 song.library = self
                 table.insert(songs, song)

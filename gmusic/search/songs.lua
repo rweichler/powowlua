@@ -2,7 +2,7 @@
 SEARCH.title = "Songs"
 SEARCH.icon = "BarSongs.png"
 
-function SEARCH:Filter(result)
+function SEARCH:Filter(result, callback)
     local songs = {}
     for k,v in pairs(result) do
         if v.track then
@@ -11,5 +11,5 @@ function SEARCH:Filter(result)
             table.insert(songs, song)
         end
     end
-    return songs
+    callback(songs)
 end
