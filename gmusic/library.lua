@@ -9,6 +9,10 @@ LIB.directory_order = {
     "songs"
 }
 
+LIB.search_order = {
+    "songs"
+}
+
 LIB.requires_login = true
 LIB.num_login_fields = 2
 
@@ -103,39 +107,29 @@ function LIB:Login(email, password, callback)
     end)
 end
 
-function LIB:Search(query, max_results, callback)
-
-    if not callback and type(max_results) == "function" then
-        callback = max_results
-        max_results = 30
-    end
-
+function LIB:Search(query, callback, index)
+    local search = self.searches[index]
 
     local url = "https://www.googleapis.com/sj/v1.1/query"
 
     local params = {
         q = query
     }
-    params['max-results'] = max_results
+    params['max-results'] = 40
 
     self.session:get(url, params, function(result)
         if result.failed or result.status ~= 200 then
             callback(false, result)
         else
             local json = http.json.decode(result.body)
-            local songs = {}
+            local songs
             if json.entries ~= nil then
-                for k,v in pairs(json.entries) do
-                    if v.track then
-                        local song = self.song:new()
-                        song:SetInfo(v.track)
-                        table.insert(songs, song)
-                    end
-                end
+                songs = search:Filter(json.entries)
             end
-            callback(songs)
+            callback(songs or {})
         end
     end)
+
 end
 
 function LIB:GetSongs(callback)

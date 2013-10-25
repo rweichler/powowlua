@@ -2,7 +2,7 @@ local path = bundle_path.."soundcloud/key.lua"
 if not io.open(path) and not private_key then
     error('soundcloud private key missing (put "return \'KEY_HERE\'" in key.lua)')
 end
-local private_key = dofile(path) or private_key
+local private_key = private_key or dofile(path)
 
 SONG.can_cache = true
 SONG.album = "SoundCloud"

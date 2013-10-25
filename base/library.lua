@@ -34,6 +34,19 @@ function lib:new(o)
     return o
 end
 
+function lib:Search(query, callback, index)
+    if not self.searches then
+        callback{}
+    else
+        local search = self.searches[index]
+        if search.Search then
+            search:Search(query, callback)
+        else
+            callback{}
+        end
+    end
+end
+
 function lib:Load(callback)
     if type(callback) == "function" then
         callback(false)
