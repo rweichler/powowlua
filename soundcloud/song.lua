@@ -5,6 +5,7 @@ end
 local private_key = dofile(path) or private_key
 
 SONG.can_cache = true
+SONG.album = "SoundCloud"
 
 function SONG:StreamURL(callback)
     callback(self.info.stream_url.."?client_id="..private_key)
@@ -26,6 +27,5 @@ function SONG:SetInfo(info)
     self.info = info
     self.title = info.title
     self.artist = info.user.username
-    self.album = "SoundCloud"
     self.id = info.id
 end
