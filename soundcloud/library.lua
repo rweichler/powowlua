@@ -10,7 +10,8 @@ LIB.short_title = "SCloud"
 LIB.color = {255, 77, 25}
 
 LIB.search_order = {
-    "songs"
+    "songs",
+    "users",
 }
 
 
