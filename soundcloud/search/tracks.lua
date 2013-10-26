@@ -5,7 +5,7 @@ end
 local private_key = private_key or dofile(path)
 
 --actual class
-SEARCH.title = "Songs"
+SEARCH.title = "Tracks"
 SEARCH.icon = "BarSongs.png"
 
 function SEARCH:Search(query, callback)
