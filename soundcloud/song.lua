@@ -28,4 +28,5 @@ function SONG:SetInfo(info)
     self.title = info.title
     self.artist = info.user.username
     self.id = info.id
+    self.subtitle = self.artist.." - "..self.album
 end

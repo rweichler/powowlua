@@ -20,15 +20,33 @@ function lib:new(o)
 
     --o.directories = {}
     if o.class then
+        --song
         local song = dofile(bundle_path.."base/song.lua")
         SONG = {}
-        dofile(bundle_path..o.class.."/song.lua")
+        local path = bundle_path..o.class.."/song.lua"
+        if io.open(path) then
+            dofile(path)
+        end
         for k,v in pairs(SONG) do
             song[k] = v
         end
         song.class = o.class
         song.library = o
         o.song = song
+
+        --directory
+        local dir = dofile(bundle_path.."base/directory.lua")
+        DIR = {}
+        local path = bundle_path..o.class.."/directory.lua"
+        if io.open(path) then
+            dofile(path)
+        end
+        dir.class = o.class
+        dir.library = o
+        o.directory = dir
+
+        --just in case
+        o.library = o
     end
 
     return o

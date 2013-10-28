@@ -15,6 +15,9 @@ function SEARCH:Search(query, callback)
         q = query,
         client_id = private_key,
     }
+    local song_fetch_params = {
+        client_id = private_key,
+    }
     if not self.library.session then
         self.library.session = http.session:new()
     end
@@ -23,34 +26,30 @@ function SEARCH:Search(query, callback)
             callback(false, "idk", result)
             return
         end
-        local songs = {}
+        local dirs = {}
         local json = http.json.decode(result.body)
         local count = 0
         for k,v in pairs(json) do
-            count = count + 1
-            local url = "https://api.soundcloud.com/playlists/"..v.id.."/tracks.json"
-            local params = {
-                client_id = private_key
-            }
-
-            self.library.session:get(url, params, function(result)
-                local json = http.json.decode(result.body)
-                local user = {}
-                for k,v in pairs(json) do
-                    if v.streamable then
-                        local song = self.library.song:new()
-                        song:SetInfo(v)
-                        song.library = self
-                        table.insert(user, song)
+            local directory = self.library.directory:new()
+            directory.title = v.title
+            directory.subtitle = v.user.username..", "..v.track_count.." tracks"
+            function directory:loaditems(callback)
+                local url = "https://api.soundcloud.com/playlists/"..v.id.."/tracks.json"
+                self.library.session:get(url, song_fetch_params, function(result)
+                    local json = http.json.decode(result.body)
+                    local songs = {}
+                    for k,v in pairs(json) do
+                        if v.streamable then
+                            local song = self.library.song:new()
+                            song:SetInfo(v)
+                            table.insert(songs, song)
+                        end
                     end
-                end
-                table.insert(songs, user)
-
-                count = count - 1
-                if count == 0 then
                     callback(songs)
-                end
-            end)
+                end)
+            end
+            table.insert(dirs, directory)
         end
+        callback(dirs)
     end)
 end

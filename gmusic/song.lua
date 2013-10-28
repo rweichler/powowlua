@@ -18,6 +18,7 @@ function SONG:SetInfo(info)
     elseif info.nid then
         self.id = info.nid
     end
+    self.subtitle = self.artist.." - "..self.album
 end
 
 function SONG:StreamURL(callback)

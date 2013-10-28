@@ -25,29 +25,24 @@ function dir:update(indexes)
     self.container:update(indexes)
 end
 
-function dir:init(callback)
-    if not self.library then
-        callback(false)
-    end
+function dir:init(items)
+    return items
 end
 
+function dir:loaditems(callback)
+    callback(nil)
+end
+
+--[[
+--DEPRECATED!
 function dir:TitleAtIndex(index)
     local obj = self.items[index]
-    if obj.type == "song" then
-        return obj:Title()
-    elseif obj.type == "directory" then
-        return obj.title
-    end
-    return nil
+    return obj.title
 end
 
 function dir:SubtitleAtIndex(index)
     local obj = self.items[index]
-    if obj.type == "song" then
-        return obj:Artist().." - "..obj:Album()
-    elseif obj.type == "directory" then
-        return obj.subtitle
-    end
-    return nil
+    return obj.subtitle
 end
+]]
 return dir

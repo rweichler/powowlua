@@ -30,7 +30,6 @@ function SEARCH:Search(query, callback)
             if v.streamable then
                 local song = self.library.song:new()
                 song:SetInfo(v)
-                song.library = self
                 table.insert(songs, song)
             end
         end
