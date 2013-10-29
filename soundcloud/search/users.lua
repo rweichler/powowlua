@@ -28,7 +28,6 @@ function SEARCH:Search(query, callback)
         end
         local dirs = {}
         local json = http.json.decode(result.body)
-        local count = 0
         for k,v in pairs(json) do
             local directory = self.library.directory:new()
             directory.title = v.username

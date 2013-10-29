@@ -26,10 +26,11 @@ function lib:new(o)
         local path = bundle_path..o.class.."/song.lua"
         if io.open(path) then
             dofile(path)
+            for k,v in pairs(SONG) do
+                song[k] = v
+            end
         end
-        for k,v in pairs(SONG) do
-            song[k] = v
-        end
+
         song.class = o.class
         song.library = o
         o.song = song
@@ -40,6 +41,9 @@ function lib:new(o)
         local path = bundle_path..o.class.."/directory.lua"
         if io.open(path) then
             dofile(path)
+            for k,v in pairs(DIR) do
+                dir[k] = v
+            end
         end
         dir.class = o.class
         dir.library = o

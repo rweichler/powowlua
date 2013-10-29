@@ -16,8 +16,6 @@ function dir:new(o)
     setmetatable(o, self)
     self.__index = self
 
-    o.items = o.items or {}
-
     return o
 end
 
