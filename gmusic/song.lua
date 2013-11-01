@@ -19,6 +19,7 @@ function SONG:SetInfo(info)
         self.id = info.nid
     end
     self.subtitle = self.artist.." - "..self.album
+    self.duration = info.durationMillis/1000.0
 end
 
 function SONG:StreamURL(callback)

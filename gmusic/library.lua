@@ -12,6 +12,7 @@ LIB.directory_order = {
 LIB.search_order = {
     "songs",
     "albums",
+    "artists",
 }
 
 LIB.requires_login = true
@@ -45,6 +46,9 @@ function LIB:Login(email, password, callback)
     if not password then
         password = self.password
     end
+
+    NSLog("Email: "..email)
+    NSLog("Passw: "..password)
 
     assert(type(email) == "string")
     assert(type(password) == "string")
