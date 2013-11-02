@@ -139,6 +139,88 @@ function LIB:Search(query, callback, index)
 
 end
 
+function LIB:AddAllAccessSong(songs, callback)
+    if not songs[1] then
+        if songs.type == "song" then
+            songs = {songs}
+        else
+            callback(false, "malformed songs")
+        end
+    end
+
+    local body_table = {
+        mutations = {}
+    }
+    local default = {
+        playCount =  0,
+        rating = '0',
+        genre = '',
+        lastModifiedTimestamp = '0',
+        deleted = false,
+        beatsPerMinute = -1,
+        composer = '',
+        creationTimestamp = '-1',
+        totalDiscCount = 0,
+    }
+    local remove = {'kind', 'trackAvailableForPurchase', 'albumAvailableForPurchase', 'albumArtRef', 'artistId'}
+
+    for k,song in pairs(songs) do
+        if song.library ~= self then
+            callback(false, "The song is part of this library")
+        elseif string.sub(song.id, 1, 1) ~= 'T' then
+            callback(false, "Not All Access Song")
+            return
+        end
+        local dict = {}
+        for k,v in pairs(song.info) do
+            dict[k] = v
+        end
+
+        for k,v in pairs(remove) do
+            dict[v] = nil
+        end
+
+        for k,v in pairs(default) do
+            if not dict[k] then
+                dict[k] = v
+            end
+        end
+
+        --TODO unsure about this
+        dict['trackType'] = 8
+
+        table.insert(body_table.mutations, {create = dict})
+    end
+
+    local body = http.json.encode(body_table)
+    local url = self.sj_url.."trackbatch?alt=json"
+
+    local session = http.session:new()
+    session.headers['Authorization'] = self.session.headers['Authorization']
+    session.headers['Content-Type'] = "application/json"
+
+    session:post(url, body, function(response)
+        --{'mutate_response': [{'response_code': 'OK', 'id': '17f9fff3-ffc5-3141-abf2-0c9b588cbf77', 'client_id': ''}]}
+
+        if not response.failed and response.status == 200 then
+            NSLog(response.body)
+            local ids = {}
+            local json = http.json.decode(response.body)
+            for k,v in pairs(json.mutate_response) do
+                if v.response_code == 'OK' then
+                    table.insert(ids, v.id)
+                end
+            end
+            callback(true, ids)
+        else
+            callback(false, "Fucked up "..response.status)
+            NSLog(body)
+            NSLog("FUCK MAN"..response.body)
+        end
+    end)
+
+end
+
 function LIB:GetSongs(callback)
     if not callback then
         callback = function() end
