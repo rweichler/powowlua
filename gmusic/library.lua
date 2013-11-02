@@ -139,7 +139,7 @@ function LIB:Search(query, callback, index)
 
 end
 
-function LIB:AddAllAccessSong(songs, callback)
+function LIB:AddAllAccessSongs(songs, callback)
     if not songs[1] then
         if songs.type == "song" then
             songs = {songs}
@@ -209,13 +209,13 @@ function LIB:AddAllAccessSong(songs, callback)
             for k,v in pairs(json.mutate_response) do
                 if v.response_code == 'OK' then
                     table.insert(ids, v.id)
+                else
+                    table.insert(ids, false)
                 end
             end
             callback(true, ids)
         else
             callback(false, "Fucked up "..response.status)
-            NSLog(body)
-            NSLog("FUCK MAN"..response.body)
         end
     end)
 

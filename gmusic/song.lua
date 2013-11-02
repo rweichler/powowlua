@@ -20,6 +20,14 @@ function SONG:SetInfo(info)
     end
     self.subtitle = self.artist.." - "..self.album
     self.duration = info.durationMillis/1000.0
+    if string.sub(self.id, 1, 1) == 'T' then --all access
+        self.options = {}
+        self.options['Add to Library'] = function()
+            return function(callback)
+                self.library:AddAllAccessSongs(self, callback)
+            end
+        end
+    end
 end
 
 function SONG:StreamURL(callback)
