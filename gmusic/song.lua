@@ -47,70 +47,98 @@ function SONG:StreamURL(callback)
         return
     end
 
-    local is_all_access = string.sub(id, 1, 1) == 'T'
-
     local url = "https://play.google.com/music/play"
     local params = {
         --random ass parameters you gotta set for some reason
         u = 0,
         pt = 'e',
     }
-    if is_all_access then
+    --[[
+    https://github.com/simon-weber/Unofficial-Google-Music-API/issues/137
+    there are three cases when streaming:
+      | track type              | guid songid? | slt/sig needed? |
+       user-uploaded              yes            no
+       AA track in library        yes            yes
+       AA track not in library    no             yes
+
+    without the track['type'] field we can't tell between 1 and 2, but
+    include slt/sig anyway; the server ignores the extra params.
+    ]]
+    local key = '27f7313e-f75d-445a-ac99-56386a5fe879'
+    local salt = 'djvk4idpqo93' --this should be a generated random string of characters but im too lazy and decided to just mash my keyboard.
+
+    local sig = crypto.hmac.digest(crypto.hmac.sha1, key, id..salt)
+    sig = string.sub(sig, 1, #sig - 1) --get rid of = at the end
+    --replace + and / with - and _ respectively (for URL encode)
+    sig = string.gsub(sig, "[+|/]", function(char)
+        if char == "+" then return "-" end
+        if char == "/" then return "_" end
+    end)
+
+    params['slt'] = salt
+    params['sig'] = sig
+
+    if string.sub(id, 1, 1) == 'T' then -- all access
         params['mjck'] = id
-
-        --needa generate hashes
-        local key = '27f7313e-f75d-445a-ac99-56386a5fe879'
-        local salt = 'djvk4idpqo93' --this should be a random string of characters but im too lazy
-
-        local sig = crypto.hmac.digest(crypto.hmac.sha1, key, id..salt)
-        sig = string.sub(sig, 1, #sig - 1) --get rid of = at the end
-        --weird shit
-        sig = string.gsub(sig, "[+|/]", function(char)
-            if char == "+" then return "-" end
-            if char == "/" then return "_" end
-        end)
-
-        params['slt'] = salt
-        params['sig'] = sig
     else
         params['songid'] = id
     end
-    print('boutta call')
     self.library.session:get(url, params, function(response)
-        print('got response')
         if response.failed then
             callback(nil, response)
-        elseif is_all_access then
-            local json = http.json.decode(response.body)
-            local result = {}
-            local prev_end = 0
-            for k,v in pairs(json.urls) do
-
-                local decoded = decode(v)
-
-                local start, this_end = string.match(decoded['range'], "(%d+)-(%d+)")
-
-                start = prev_end - start
-                
-                local dict = {
-                    start = start,
-                    url = v
-                }
-                table.insert(result, dict)
-                prev_end = this_end + 1
-            end
-
-
-
-            local properties = {
-                size = string.match(decode(json.urls[#json.urls])['range'], "-(%d+)") + 1,
-                expire_time = 30,
-            }
-
-            callback(result, properties)
         else
             local json = http.json.decode(response.body)
-            callback(json.url)
+            if json.url then --song is from locker
+                callback(json.url)
+            else --song is from all access
+
+                --[[
+                Original python code: http://git.io/aomOTQ
+
+                For all access, Google instead returns an array of a bunch of stream URLs
+                instead of just one, I imagine because of contracts with the record labels.
+                If you stitch all of them together, you will notice that there are
+                miniscule parts in the song where it lags. Turns out they don't stitch
+                together perfectly.
+
+                HOWEVER, each URL comes with a bunch of parameters, including a range
+                property. You can use this range property to shave off the extra parts
+                of the MP3 stream and get a seamless playback experience. I included
+                the functionality to stitch the URLs together and to shave off certain
+                parts of the URL in my HTTPAudioPlayer, which is on GitHub:
+
+                https://github.com/rweichler/HTTPAudioPlayer
+
+                This HTTPAudioPlayer class is used to play LuaSongs in Powow, so
+                if you need some sort of odd functionality like this for the API you
+                are implementing, don't hesitate to send a pull request and I will
+                implement it if it is reasonable enough.
+
+                The rest of the Lua code should be self-explanitory.
+                ]]
+                local result = {}
+                local prev_end = 0
+                for k,v in pairs(json.urls) do
+                    local decoded = decode(v)
+
+                    local start, this_end = string.match(decoded['range'], "(%d+)-(%d+)")
+                    start = prev_end - start
+
+                    local dict = {
+                        start = start,
+                        url = v
+                    }
+                    table.insert(result, dict)
+                    prev_end = this_end + 1
+                end
+
+                local properties = {
+                    size = string.match(decode(json.urls[#json.urls])['range'], "-(%d+)") + 1,
+                    expire_time = 30,
+                }
+
+                callback(result, properties)
+            end
         end
     end)
 end
@@ -127,5 +155,8 @@ function SONG:ArtworkURL(callback)
     elseif type(self.info.albumArtRef) == "table" and type(self.info.albumArtRef[1]) == "table" then
         url = self.info.albumArtRef[1].url
     end
-    callback(url)
+    if type(callback) == "function" then
+        callback(url)
+    end
+    return url
 end

@@ -6,6 +6,7 @@ LIB.short_title = "GMusic"
 LIB.color = {255,0,255}
 
 LIB.directory_order = {
+    "artists",
     "songs",
 }
 

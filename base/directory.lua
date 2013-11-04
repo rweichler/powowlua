@@ -3,7 +3,6 @@ dir.type = "directory"
 dir.class = "base"
 
 dir.library = nil
-dir.style = "basic"
 dir.all_songs = false
 
 dir.all_songs_title = "All Songs"

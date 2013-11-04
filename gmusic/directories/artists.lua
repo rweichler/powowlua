@@ -20,19 +20,43 @@ function DIR:init(songs)
     local result = {}
     local last_artist
     local last_album
+    local track_number
     for k,v in pairs(songs) do
-        if not last_artist or last_artist[1][1].artistNorm ~= v.artistNorm then
-            last_artist = {}
-            table.insert(result, last_artist)
-        end
-        if not last_album or last_album[1].albumNorm ~= v.albumNorm then
-            last_album = {}
-            table.insert(last_artist, last_album)
-        end
-
         local song = self.library.song:new()
         song:SetInfo(v)
-        table.insert(last_album, song)
+
+        local last_artistNorm
+        if type(last_artist) == "table" then
+            last_artistNorm = last_artist.artistNorm
+        end
+
+        if not last_artist or last_artistNorm ~= v.artistNorm then
+            last_artist = self.library.directory:new()
+            last_artist.items = {}
+            last_artist.title = song.artist
+            last_artist.artistNorm = v.artistNorm
+            last_artist.style = "album"
+            table.insert(result, last_artist)
+        end
+
+        local last_albumNorm
+        if type(last_album) == "table" then
+            last_albumNorm = last_album.albumNorm
+        end
+
+        if not last_album or last_albumNorm ~= v.albumNorm or last_artistNorm ~= v.artistNorm then
+            track_number = 0
+            last_album = self.library.directory:new()
+            last_album.items = {}
+            last_album.title = song.album
+            last_album.albumNorm = v.albumNorm
+            last_album.image_url = song:ArtworkURL()
+            table.insert(last_artist.items, last_album)
+        end
+
+        track_number = track_number + 1
+        song.track_number = track_number
+        table.insert(last_album.items, song)
     end
     return result
 end
