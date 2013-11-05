@@ -10,16 +10,21 @@ end
 
 function SONG:SetInfo(info)
     self.info = info
-    self.artist = info.artist
-    self.title = info.title
-    self.album = info.album
+    self.artist = info.artist or self.artist
+    self.title = info.title or self.title
+    self.album = info.album or self.album
     if info.id then
         self.id = info.id
     elseif info.nid then
         self.id = info.nid
     end
-    self.subtitle = self.artist.." - "..self.album
-    self.duration = info.durationMillis/1000.0
+    self.subtitle = (self.artist or "Unknown Artist").." - "..(self.album or "Unknown Album")
+    if info.durationMillis then
+        self.duration = info.durationMillis/1000.0
+    else
+        NSLog("What the fuck: "..http.json.encode(info))
+    end
+    --tooltip stuff
     if string.sub(self.id, 1, 1) == 'T' then --all access
         self.options = {}
         self.options['Add to Library'] = function()
@@ -28,6 +33,29 @@ function SONG:SetInfo(info)
             end
         end
     end
+    --album art
+    local url
+    if type(self.info.albumArtUrl) == "string" then
+        url = "http:"..string.gsub(self.info.albumArtUrl, "s130", "s640")
+    elseif type(self.info.albumArtRef) == "table" and type(self.info.albumArtRef[1]) == "table" then
+        url = self.info.albumArtRef[1].url
+    end
+    self.album_art_url = url
+end
+
+function SONG:SaveData()
+    return http.json.encode{
+        album_art_url = self.album_art_url,
+        duration = self.duration,
+        track_number = self.track_number,
+    }
+end
+
+function SONG:LoadData(data)
+    local result = http.json.decode(data)
+    self.album_art_url = result.album_art_url
+    self.duration = result.duration
+    self.track_number = result.track_number
 end
 
 function SONG:StreamURL(callback)
@@ -144,19 +172,8 @@ function SONG:StreamURL(callback)
 end
 
 function SONG:ArtworkURL(callback)
-    if not type(self.info) == "table" then
-        callback(nil)
-        return
-    end
-
-    local url
-    if type(self.info.albumArtUrl) == "string" then
-        url = "http:"..string.gsub(self.info.albumArtUrl, "s130", "s640")
-    elseif type(self.info.albumArtRef) == "table" and type(self.info.albumArtRef[1]) == "table" then
-        url = self.info.albumArtRef[1].url
-    end
     if type(callback) == "function" then
-        callback(url)
+        callback(self.album_art_url)
     end
-    return url
+    return self.album_art_url
 end

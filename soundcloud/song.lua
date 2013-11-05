@@ -8,19 +8,14 @@ SONG.can_cache = true
 SONG.album = "SoundCloud"
 
 function SONG:StreamURL(callback)
-    callback(self.info.stream_url.."?client_id="..private_key)
+    callback(self.stream_url.."?client_id="..private_key)
 end
 
 function SONG:ArtworkURL(callback)
-    local url
-    if type(self.info.artwork_url) == "string" then
-        url = self.info.artwork_url
+    if type(callback) == 'function' then
+        callback(self.album_art_url)
     end
-    url = url or self.info.user.avatar_url
-    if not string.find(url, "default_avatar") then
-        url = string.gsub(url, "large", "t500x500")
-        callback(url)
-    end
+    return self.album_art_url
 end
 
 function SONG:SetInfo(info)
@@ -29,4 +24,27 @@ function SONG:SetInfo(info)
     self.artist = info.user.username
     self.id = info.id
     self.subtitle = self.artist.." - "..self.album
+    self.stream_url = info.stream_url
+    local url
+    if type(self.info.artwork_url) == "string" then
+        url = self.info.artwork_url
+    end
+    url = url or self.info.user.avatar_url
+    if not string.find(url, "default_avatar") then
+        url = string.gsub(url, "large", "t500x500")
+    end
+    self.album_art_url = url
+end
+
+function SONG:SaveData()
+    return http.json.encode{
+        stream_url = self.stream_url,
+        album_art_url = self.album_art_url,
+    }
+end
+
+function SONG:LoadData(data)
+    local result = http.json.decode(data)
+    self.stream_url = result.stream_url
+    self.album_art_url = result.album_art_url
 end
