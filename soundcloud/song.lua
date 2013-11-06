@@ -31,9 +31,8 @@ function SONG:SetInfo(info)
     end
     url = url or self.info.user.avatar_url
     if not string.find(url, "default_avatar") then
-        url = string.gsub(url, "large", "t500x500")
+        self.album_art_url = string.gsub(url, "large", "t500x500")
     end
-    self.album_art_url = url
 end
 
 function SONG:SaveData()
