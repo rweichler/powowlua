@@ -62,7 +62,7 @@ function DIR:loaditems(callback)
                                 nid = id,
                             }
                             session:get(url, params, function(result)
-                                local json = json.decode(result.body)
+                                local json = http.json.decode(result.body)
                                 song:SetInfo(json)
                                 num_all_access = num_all_access - 1
                                 if num_all_access == 0 then
