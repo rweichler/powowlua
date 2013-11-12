@@ -45,21 +45,43 @@ function DIR:loaditems(callback)
                     end)
 
                     local songs = {}
+                    local num_all_access = 0
                     for k,v in pairs(self.plentries) do
-                        local song = self.library.song:new()
-                        local info = self.library.song_from_id[v.trackId]
-                        if not info then
-                            local count = 0
-                            for k,v in pairs(self.library.song_from_id) do
-                                count = count + 1
-                            end
-                            NSLog('id is nil! '..v.id.." "..(count).." IJFOSDJ")
-                        else
-                            song:SetInfo(info)
+                        local id = v.trackId
+                        if string.sub(id, 1, 1) == 'T' then
+                            num_all_access = num_all_access + 1
+                            local song = self.library.song:new()
                             table.insert(songs, song)
+
+                            local session = http.session:new()
+                            session.headers['Authorization'] = self.library.session.headers['Authorization']
+                            session.headers['Content-Type'] = 'application/json'
+                            local url = self.library.sj_url..'fetchtrack'
+                            local params = {
+                                alt = 'json',
+                                nid = id,
+                            }
+                            session:get(url, params, function(result)
+                                local json = json.decode(result.body)
+                                song:SetInfo(json)
+                                num_all_access = num_all_access - 1
+                                if num_all_access == 0 then
+                                    callback(songs)
+                                end
+                            end)
+
+                        else
+                            local song = self.library.song:new()
+                            local info = self.library.song_from_id[id]
+                            if info then
+                                song:SetInfo(info)
+                                table.insert(songs, song)
+                            end
                         end
                     end
-                    callback(songs)
+                    if num_all_access == 0 then
+                        callback(songs)
+                    end
                 end
             end
         end
