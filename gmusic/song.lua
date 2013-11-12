@@ -9,6 +9,9 @@ local function decode(s)
 end
 
 function SONG:SetInfo(info)
+    if type(info) == "nil" then
+        NSLog("WHAT THE FUCK INFO IS NIL")
+    end
     self.info = info
     self.artist = info.artist or self.artist
     self.title = info.title or self.title
@@ -27,10 +30,10 @@ function SONG:SetInfo(info)
     --tooltip stuff
     if string.sub(self.id, 1, 1) == 'T' then --all access
         self.options = {}
-        self.options['Add to Library'] = function()
-            return function(callback)
-                self.library:AddAllAccessSongs(self, callback)
-            end
+        self.options['Add to Library'] = function(callback)
+            local func = self.library.AddAllAccessSongs
+            NSLog(type(func))
+            func(self.library, self, callback)
         end
     end
     --album art

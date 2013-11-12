@@ -8,6 +8,7 @@ LIB.color = {255,0,255}
 LIB.directory_order = {
     "artists",
     "songs",
+    "playlists",
 }
 
 LIB.search_order = {
@@ -26,9 +27,15 @@ function LIB:Load(callback)
         callback(false)
     else
         self:GetSongs(function(status)
-            if status ~= 200 then
+            if type(status) == "string" then
+                callback(status)
+            elseif status ~= 200 then
                 callback(false)
             else
+                self.song_from_id = {}
+                for k,v in pairs(self.songs) do
+                    self.song_from_id[v.id] = v
+                end
                 callback(self.songs)
             end
         end)
@@ -74,7 +81,15 @@ function LIB:Login(email, password, callback)
         --timeout/wrong credentials
         if response.status ~= 200 then
             if callback then
-                callback(false, response.status, "can't get auth token")
+                local msg
+                if response.status == 0 then
+                    msg = "Could not connect to Google"
+                elseif response.status == 403 then
+                    msg = "Wrong username or password"
+                else
+                    msg = "Unknown error ("..response.status.."). Take a screenshot of this and send to rweichler@gmail.com"
+                end
+                callback(false, response.status, msg)
             end
             return
         end
@@ -140,12 +155,18 @@ function LIB:Search(query, callback, index)
 
 end
 
+function LIB:SavePlaylist(songs, callback)
+
+
+end
+
 function LIB:AddAllAccessSongs(songs, callback)
     if not songs[1] then
         if songs.type == "song" then
             songs = {songs}
         else
             callback(false, "malformed songs")
+            return
         end
     end
 
@@ -168,6 +189,7 @@ function LIB:AddAllAccessSongs(songs, callback)
     for k,song in pairs(songs) do
         if song.library ~= self then
             callback(false, "The song is part of this library")
+            return
         elseif string.sub(song.id, 1, 1) ~= 'T' then
             callback(false, "Not All Access Song")
             return
@@ -202,7 +224,6 @@ function LIB:AddAllAccessSongs(songs, callback)
 
     session:post(url, body, function(response)
         --{'mutate_response': [{'response_code': 'OK', 'id': '17f9fff3-ffc5-3141-abf2-0c9b588cbf77', 'client_id': ''}]}
-
         if not response.failed and response.status == 200 then
             NSLog(response.body)
             local ids = {}
@@ -244,6 +265,8 @@ function LIB:GetSongs(callback)
 
     self.songs = nil
 
+    callback("Getting library from Google Music..")
+
     --recursive fetch of all song info
     local function handle_data(response)
         if response then
@@ -268,6 +291,7 @@ function LIB:GetSongs(callback)
             if json.continuationToken then
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
             else
+               
                 callback(response.status)
                 return --if there's no continuation token, then we're done
             end

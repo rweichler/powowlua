@@ -21,25 +21,22 @@ end
 function dir:update(indexes)
     self.container:update(indexes)
 end
-
+--[[
+--implement this method only if it depends on the contents of LIB:Load
 function dir:init(items)
     return items
 end
-
+]]
 function dir:loaditems(callback)
     callback(nil)
 end
 
---[[
---DEPRECATED!
-function dir:TitleAtIndex(index)
-    local obj = self.items[index]
-    return obj.title
+function dir:SaveData()
+    return self.image_url
 end
 
-function dir:SubtitleAtIndex(index)
-    local obj = self.items[index]
-    return obj.subtitle
+function dir:LoadData(data)
+    self.image_url = data
 end
-]]
+
 return dir
