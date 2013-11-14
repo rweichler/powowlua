@@ -23,6 +23,7 @@ function SEARCH:Filter(result, callback)
             table.insert(dirs, d_artist)
             d_artist.title = v.artist.name
             d_artist.style = "album"
+            d_artist.header = false
             function d_artist:loaditems(callback)
                 params['nid'] = v.artist.artistId
                 self.library.session:get(url, params, function(response)

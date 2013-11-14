@@ -29,6 +29,7 @@ function SEARCH:Filter(result, callback)
             end
             directory.title = v.album.name
             directory.subtitle = v.album.albumArtist
+            directory.header = false
             table.insert(dirs, directory)
         end
     end

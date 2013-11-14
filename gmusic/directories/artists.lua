@@ -1,5 +1,5 @@
 
-DIR.header = nil
+DIR.header = false
 DIR.title = "Artists"
 DIR.icon = "BarArtists.png"
 
