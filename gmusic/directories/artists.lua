@@ -1,5 +1,5 @@
 
-DIR.all_songs = false
+DIR.header = nil
 DIR.title = "Artists"
 DIR.icon = "BarArtists.png"
 

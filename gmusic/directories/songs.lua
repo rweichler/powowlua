@@ -1,5 +1,4 @@
-
-DIR.all_songs = true
+DIR.header = "All Songs"
 DIR.title = "Songs"
 DIR.icon = "BarSongs.png"
 

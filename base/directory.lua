@@ -3,9 +3,8 @@ dir.type = "directory"
 dir.class = "base"
 
 dir.library = nil
-dir.all_songs = false
+dir.header = "All Songs"
 
-dir.all_songs_title = "All Songs"
 dir.title = nil
 dir.subtitle = nil
 dir.icon = nil
