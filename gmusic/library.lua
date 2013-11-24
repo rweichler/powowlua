@@ -32,10 +32,6 @@ function LIB:Load(callback)
             elseif status ~= 200 then
                 callback(false)
             else
-                self.song_from_id = {}
-                for k,v in pairs(self.songs) do
-                    self.song_from_id[v.id] = v
-                end
                 callback(self.songs)
             end
         end)
