@@ -6,18 +6,13 @@ function DIR:init(songs)
     local start = os.clock()
     --alphabetize that shit
     table.sort(songs, function(a, b)
-        return a.titleNorm < b.titleNorm
+        return a.info.titleNorm < b.info.titleNorm
     end)
 
     local result = {}
 
-    for k,v in pairs(songs) do
-        local song = self.library.song:new()
-        song:SetInfo(v)
+    for k,song in pairs(songs) do
         table.insert(result, song)
     end
-
-    NSLog("directory_songs.lua took "..(os.clock() - start).." seconds")
-
     return result
 end

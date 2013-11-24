@@ -283,10 +283,17 @@ function LIB:GetSongs(callback)
             --append the song info somewhere
             if self.songs then
                 for k,v in pairs(json.playlist) do
-                    table.insert(self.songs, v)
+                    local song = self.song:new()
+                    song:SetInfo(v)
+                    table.insert(self.songs, song)
                 end
             else
                 self.songs = json.playlist
+                for k,v in pairs(self.songs) do
+                    local song = self.song:new()
+                    song:SetInfo(v)
+                    self.songs[k] = song
+                end
             end
             if json.continuationToken then
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'

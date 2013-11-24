@@ -65,6 +65,7 @@ function DIR:loaditems(callback)
                             session:get(url, params, function(result)
                                 local json = http.json.decode(result.body)
                                 song:SetInfo(json)
+                                song.plentry = v
                                 num_all_access = num_all_access - 1
                                 if num_all_access == 0 then
                                     callback(songs)
@@ -72,11 +73,12 @@ function DIR:loaditems(callback)
                             end)
 
                         else
-                            local song = self.library.song:new()
-                            local info = self.library.song_from_id[id]
-                            if info then
-                                song:SetInfo(info)
-                                table.insert(songs, song)
+                            local song = self.library.song_from_id[id]
+                            if song then
+                                local song2 = {}
+                                song2.plentry = v
+                                setmetatable(song2, song)
+                                table.insert(songs, song2)
                             end
                         end
                     end
