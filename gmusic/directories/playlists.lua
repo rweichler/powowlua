@@ -4,6 +4,7 @@ DIR.title = "Playlists"
 DIR.icon = "BarPlaylists.png"
 
 function DIR:loaditems(callback)
+
     local url = self.library.sj_url.."playlistfeed"
     local params = {}
     self.library.session:post(url, params, function(result)
@@ -11,7 +12,8 @@ function DIR:loaditems(callback)
         local playlists = {}
         local id_to_playlist = {}
 
-        local loaded_that_shit = false
+        local loading = nil
+        local loaded = false
 
         local json = http.json.decode(result.body)
         for k,v in pairs(json.data.items) do
@@ -23,8 +25,8 @@ function DIR:loaditems(callback)
             playlist.id = v.id
             id_to_playlist[v.id] = playlist
             function playlist:loaditems(callback)
-                if not loaded_that_shit then
-                    loaded_that_shit = true
+                if not loaded and not loading then
+                    loading = {}
                     local url = self.library.sj_url.."plentryfeed"
                     self.library.session:post(url, params, function(result)
                         local json = http.json.decode(result.body)
@@ -37,8 +39,15 @@ function DIR:loaditems(callback)
                                 table.insert(plist.plentries, v)
                             end
                         end
+                        loaded = true
                         self:loaditems(callback)
+                        for k,v in pairs(loading) do
+                            loading[1]:loaditems(loading[2])
+                        end
+                        loading = nil
                     end)
+                elseif not loaded then
+                    table.insert(loading, {self, callback})
                 else
                     self.plentries = self.plentries or {}
                     table.sort(self.plentries, function(a,b)
@@ -73,12 +82,12 @@ function DIR:loaditems(callback)
                             end)
 
                         else
-                            local song = self.library.song_from_id[id]
-                            if song then
-                                local song2 = {}
-                                song2.plentry = v
-                                setmetatable(song2, song)
-                                table.insert(songs, song2)
+                            local items = self.library.directories['songs'].items
+                            for k,song in pairs(items) do
+                                if song.id == id then
+                                    table.insert(songs, song)
+                                    break
+                                end
                             end
                         end
                     end
