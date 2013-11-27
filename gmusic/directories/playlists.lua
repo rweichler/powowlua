@@ -29,6 +29,12 @@ function DIR:loaditems(callback)
                     loading = {}
                     local url = self.library.sj_url.."plentryfeed"
                     self.library.session:post(url, params, function(result)
+                        if result.status == 0 then
+                            for k,v in pairs(loading) do
+                                loading[2](nil)
+                            end
+                            return
+                        end
                         local json = http.json.decode(result.body)
                         for k,v in pairs(json.data.items)do
                             local plist = id_to_playlist[v.playlistId]

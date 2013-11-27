@@ -8,6 +8,11 @@ function DIR:init(songs)
     table.sort(songs, function(a, b)
         if a.info.artistNorm == b.info.artistNorm then
             if a.info.albumNorm == b.info.albumNorm then
+                if not a.info.track then
+                    return true
+                elseif not b.info.track then
+                    return false
+                end
                 return a.info.track < b.info.track
             else
                 return a.info.albumNorm < b.info.albumNorm

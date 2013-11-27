@@ -164,7 +164,7 @@ function SONG:StreamURL(callback)
                 end
 
                 local properties = {
-                    size = string.match(decode(json.urls[#json.urls])['range'], "-(%d+)") + 1,
+                    size = string.match(decode(json.urls[#json.urls])['range'], "-(%d+)"),
                     expire_time = 30,
                 }
 

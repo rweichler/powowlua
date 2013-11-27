@@ -22,10 +22,10 @@ LIB.num_login_fields = 2
 
 LIB.logged_in = false
 
-function LIB:Load(callback)
+function LIB:Load(callback, loaded)
     if not self.logged_in then
         callback(false)
-    else
+    elseif not loaded then
         self:GetSongs(function(status)
             if type(status) == "string" then
                 callback(status)
@@ -34,6 +34,22 @@ function LIB:Load(callback)
             else
                 callback(self.songs)
             end
+        end)
+    else
+        self:UpdateSongs(function(songs)
+            if not songs then return end
+
+            local remove = {}
+            local add = {}
+            for k, song in pairs(songs) do
+                if song.deleted then
+                    table.insert(remove, song)
+                else
+                    table.insert(add, song)
+                end
+            end
+
+            --TODO: do some crap with add and remove
         end)
     end
 end
@@ -239,6 +255,33 @@ function LIB:AddAllAccessSongs(songs, callback)
 
 end
 
+function LIB:UpdateSongs(callback)
+    local url = "https://play.google.com/music/services/streamingloadalltracks"
+    local params = {
+        u = 0,
+        xt = self.session.cookies['xt'],
+        lastUpdated = self.info.lastUpdated,
+        format='json',
+    }
+
+    self.session:get(url, params, function(response)
+
+        self.info.lastUpdated = os.clock()
+
+        local str = string.match(response.body, "\"playlist\":(.*)}%);\n")
+        if not str then callback(nil) return end
+
+        local songs = json.decode(str)
+        for k,v in pairs(songs) do
+            local song = self.song:new()
+            song:SetInfo(v)
+            songs[k] = song
+        end
+
+
+    end)
+end
+
 function LIB:GetSongs(callback)
     if not callback then
         callback = function() end
@@ -294,7 +337,7 @@ function LIB:GetSongs(callback)
             if json.continuationToken then
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
             else
-               
+                self.info.lastUpdated = os.clock()
                 callback(response.status)
                 return --if there's no continuation token, then we're done
             end

@@ -24,11 +24,7 @@ function SONG:SetInfo(info)
     self.artist = info.user.username
     self.id = info.id
     self.subtitle = self.artist.." - "..self.album
-    if info.downloadable then
-        self.stream_url = info.download_url --YEAH BABYYY OH YEAHHHHHH
-    else
-        self.stream_url = info.stream_url
-    end
+    self.stream_url = info.stream_url
     local url
     if type(self.info.artwork_url) == "string" then
         url = self.info.artwork_url
