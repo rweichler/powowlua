@@ -23,6 +23,7 @@ LIB.num_login_fields = 2
 LIB.logged_in = false
 
 function LIB:Load(callback, loaded)
+    self.info = self.info or {}
     if not self.logged_in then
         callback(false)
     elseif not loaded then
@@ -266,7 +267,7 @@ function LIB:UpdateSongs(callback)
 
     self.session:get(url, params, function(response)
 
-        self.info.lastUpdated = os.clock()
+        self.info.lastUpdated = os.time()
 
         local str = string.match(response.body, "\"playlist\":(.*)}%);\n")
         if not str then callback(nil) return end
@@ -337,7 +338,7 @@ function LIB:GetSongs(callback)
             if json.continuationToken then
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
             else
-                self.info.lastUpdated = os.clock()
+                self.info.lastUpdated = os.time()
                 callback(response.status)
                 return --if there's no continuation token, then we're done
             end
