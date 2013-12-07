@@ -28,7 +28,7 @@ local function create_dir(dir, path)
 end
 
 function LIB:Load(callback, info)
-    self.info = info
+    self.info = info --TODO implement this
 
     --load directories if they have already been saved
     --TODO implement this
@@ -48,8 +48,8 @@ function LIB:Load(callback, info)
                 artists:init(result)
                 songs:init(result)
 
-                artists:save(self.class)
-                songs:save(self.class)
+                artists:save(self.class) --TODO implement this
+                songs:save(self.class) --TODO implement this
 
                 callback({artists, songs, playlists})
             elseif type(result) == 'string' then
@@ -74,9 +74,9 @@ function LIB:Load(callback, info)
                 for k, dir in pairs(directories) do
                     for k, song in pairs(songs) do
                         if song.deleted then
-                            dir:remove(song)
+                            dir:remove(song) --TODO implement this
                         else
-                            dir:add(song)
+                            dir:add(song) --TODO implement this
                         end
                     end
                 end
