@@ -1,15 +1,11 @@
 --SHOUT OUT TO SIMON WEBER FOR MAKING THE BEST GOOGLE MUSIC API EVER (which is what this is based on)
 --https://github.com/simon-weber/Unofficial-Google-Music-API/
 
+local powow = require 'powow'
+
 LIB.title = "Google Music"
 LIB.short_title = "GMusic"
 LIB.color = {255,0,255}
-
-LIB.directory_order = {
-    "artists",
-    "songs",
-    "playlists",
-}
 
 LIB.search_order = {
     "songs",
@@ -22,35 +18,72 @@ LIB.num_login_fields = 2
 
 LIB.logged_in = false
 
-function LIB:Load(callback, loaded)
-    self.info = self.info or {}
-    if not self.logged_in then
-        callback(false)
-    elseif not loaded then
-        self:GetSongs(function(status)
-            if type(status) == "string" then
-                callback(status)
-            elseif status ~= 200 then
-                callback(false)
+local function create_dir(dir, path)
+    path = bundle_path..self.class.."/directories/"..path
+    local env = {DIR = dir}
+    setmetatable(env, {__index=_ENV})
+    local f = loadfile(path, "bt", env)
+    f()
+    return dir
+end
+
+function LIB:Load(callback, info)
+    self.info = info
+
+    --load directories if they have already been saved
+    --TODO implement this
+    directories = powow.get_saved_directories(self.class)
+
+    if not directories or #directories == 0 then
+        self:GetSongs(function(result)
+            if type(result) == table then
+                local artists = create_dir(self.directory:new(), "artists.lua")
+                local songs = create_dir(self.directory:new(), "songs.lua")
+                local playlists = create_dir(self.directory:new(), "playlists.lua")
+
+                table.insert(directories, artists)
+                table.insert(directories, songs)
+                table.insert(directories, playlists)
+
+                artists:init(result)
+                songs:init(result)
+
+                artists:save(self.class)
+                songs:save(self.class)
+
+                callback({artists, songs, playlists})
+            elseif type(result) == 'string' then
+                callback(result)
             else
-                callback(self.songs)
+                callback(false)
             end
         end)
     else
-        self:UpdateSongs(function(songs)
-            if not songs then return end
+        --directories just contains the songs (dir.items), but we still want them to have their special functions, so we will initialize them this way
 
-            local remove = {}
-            local add = {}
-            for k, song in pairs(songs) do
-                if song.deleted then
-                    table.insert(remove, song)
-                else
-                    table.insert(add, song)
+        for k, dir in pairs(directories) do
+            if dir.title == "Songs" then
+                create_dir(dir, "songs.lua")
+            elseif dir.title == "Artists" then
+                create_dir(dir, "artists.lua")
+            end
+        end
+
+        self:UpdateSongs(function(result)
+            if result and #result > 0 then
+                for k, dir in pairs(directories) do
+                    for k, song in pairs(songs) do
+                        if song.deleted then
+                            dir:remove(song)
+                        else
+                            dir:add(song)
+                        end
+                    end
                 end
             end
-
-            --TODO: do some crap with add and remove
+            local playlists = create_dir(self.directory:new(), "playlists.lua")
+            table.insert(directories, playlists)
+            callback(directories)
         end)
     end
 end
