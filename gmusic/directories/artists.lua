@@ -63,3 +63,74 @@ function DIR:init(songs)
     end
     return result
 end
+
+local function comp_artist(a, b)
+    --directories don't have artist attribute
+    local a_artist = a.artist or a.title
+    local b_artist = b.artist or b.title
+    return string.lower(a_artist) < string.lower(b_artist)
+end
+
+local function comp_album(a, b)
+    --directories don't have album attribute
+    local a_album = a.album or a.title
+    local b_album = b.album or b.title
+    return string.lower(a_album) < string.lower(b_album)
+end
+
+local function comp_title(a, b)
+    return string.lower(a.title) < string.lower(b.title)
+end
+
+function DIR:add(song)
+    --find artist directory
+    local index = table.bininsert(self.items, song, comp_artist)
+    local artist
+    if #self.items > index then
+        artist = self.items[index]
+    end
+    if not artist or string.lower(artist.title) ~= string.lower(song.artist) then --need to create new dir
+        artist = self.library.directory:new()
+        artist.title = song.artist
+        table.insert(self.items, index, artist)
+    end
+
+    local index = table.bininsert(artist, song, comp_album)
+    local album
+    if #artist > index then
+        album = artist[index]
+    end
+    if not album or string.lower(album.title) ~= string.lower(song.album) then --need to create new dir
+        album = self.library.directory:new()
+        album.title = song.album
+        table.insert(artist, index, album)
+    end
+
+    local index = table.bininsert(album, song, comp_title)
+    table.insert(album, index, song)
+end
+
+function DIR:remove(song)
+    local index = table.binsert(self.items, song, comp_artist)
+    local artist
+    if #self.items <= index or string.lower(self.items[index].title) ~= string.lower(song.artist) then
+        return false
+    else
+        artist = self.items[index]
+    end
+
+    local index = table.binsert(artist, song, comp_album)
+    local album
+    if #artist <= index or string.lower(artist[index].title) ~= string.lower(song.album) then
+        return false
+    else
+        album = artist[index]
+    end
+
+    local index = table.bininsert(album, song, comp_title)
+    if #album <= index or string.lower(album[index].title) ~= string.lower(song.title) then
+        return false
+    end
+    table.remove(album, index)
+    return true
+end

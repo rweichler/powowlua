@@ -27,12 +27,11 @@ local function create_dir(dir, path)
     return dir
 end
 
-function LIB:Load(callback, info)
-    self.info = info --TODO implement this
+function LIB:Load(callback, info) --TODO implement callback and info
+    self.info = info
 
     --load directories if they have already been saved
-    --TODO implement this
-    directories = powow.get_saved_directories(self.class)
+    local directories = powow.get_saved_directories(self.class) --TODO implement this
 
     if not directories or #directories == 0 then
         self:GetSongs(function(result)
@@ -72,12 +71,15 @@ function LIB:Load(callback, info)
         self:UpdateSongs(function(result)
             if result and #result > 0 then
                 for k, dir in pairs(directories) do
-                    for k, song in pairs(songs) do
-                        if song.deleted then
-                            dir:remove(song) --TODO implement this
-                        else
-                            dir:add(song) --TODO implement this
+                    if dir.title == "Songs" or dir.title == "Artists" then
+                        for k, song in pairs(songs) do
+                            if song.deleted then
+                                dir:remove(song)
+                            else
+                                dir:add(song)
+                            end
                         end
+                        dir:save() --TODO implement this
                     end
                 end
             end

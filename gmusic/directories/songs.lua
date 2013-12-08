@@ -16,3 +16,21 @@ function DIR:init(songs)
     end
     return result
 end
+
+local function comp(a,b)
+    return string.lower(a.title) < string.lower(b.title)
+end
+
+function DIR:add(song)
+    local index = table.bininsert(self.items, song, comp)
+    table.insert(self.items, index, song)
+end
+
+function DIR:remove(song)
+    local index = table.bininsert(self.items, song, comp)
+    if self.items[index].id == song.id then
+        table.remove(self.items, index)
+        return true
+    end
+    return false
+end
