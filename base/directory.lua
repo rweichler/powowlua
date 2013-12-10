@@ -12,7 +12,14 @@ dir.icon = nil
 function dir:new(o)
     o = o or {}
     setmetatable(o, self)
-    self.__index = self
+    self.__index = function(slf, key)
+        if key == "items" and not self[key] then
+            local items = __load_items_from_memory(slf)
+            slf.items = items
+            return items
+        end
+        return self[key]
+    end
 
     return o
 end
@@ -37,5 +44,8 @@ end
 function dir:LoadData(data)
     self.image_url = data
 end
+
+--implemented in C
+dir.save = __save_directory --TODO implement this
 
 return dir

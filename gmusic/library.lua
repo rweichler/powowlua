@@ -18,8 +18,17 @@ LIB.num_login_fields = 2
 
 LIB.logged_in = false
 
-local function create_dir(dir, path)
-    path = bundle_path..self.class.."/directories/"..path
+local function create_dir(dir, path, kind)
+    if type(dir) == "string" then
+        kind = path
+        path = dir
+        dir = self.directory:new()
+    end
+    if not kind then
+        kind = "directories"
+    end
+
+    path = bundle_path..self.class.."/"..kind.."/"..path
     local env = {DIR = dir}
     setmetatable(env, {__index=_ENV})
     local f = loadfile(path, "bt", env)
@@ -32,25 +41,30 @@ function LIB:Load(callback, info) --TODO implement callback and info
 
     --load directories if they have already been saved
     local directories = powow.get_saved_directories(self.class) --TODO implement this
+    --create search
+    local search = self.directory:new()
+    search.style = "search"
+    search.items = {
+        create_dir("songs.lua", "search"),
+        create_dir("albums.lua", "search"),
+        create_dir("artists.lua", "search")
+    }
+    --create playlists
+    local playlists = create_dir("playlists.lua")
 
     if not directories or #directories == 0 then
         self:GetSongs(function(result)
             if type(result) == table then
-                local artists = create_dir(self.directory:new(), "artists.lua")
-                local songs = create_dir(self.directory:new(), "songs.lua")
-                local playlists = create_dir(self.directory:new(), "playlists.lua")
-
-                table.insert(directories, artists)
-                table.insert(directories, songs)
-                table.insert(directories, playlists)
+                local artists = create_dir("artists.lua")
+                local songs = create_dir("songs.lua")
 
                 artists:init(result)
                 songs:init(result)
 
-                artists:save(self.class) --TODO implement this
-                songs:save(self.class) --TODO implement this
+                artists:save() --TODO
+                songs:save() --TODO
 
-                callback({artists, songs, playlists})
+                callback{artists, search, songs, playlists}
             elseif type(result) == 'string' then
                 callback(result)
             else
@@ -59,33 +73,31 @@ function LIB:Load(callback, info) --TODO implement callback and info
         end)
     else
         --directories just contains the songs (dir.items), but we still want them to have their special functions, so we will initialize them this way
-
-        for k, dir in pairs(directories) do
-            if dir.title == "Songs" then
-                create_dir(dir, "songs.lua")
-            elseif dir.title == "Artists" then
-                create_dir(dir, "artists.lua")
-            end
+        local songs = directories[1]
+        local artists = directories[2]
+        if songs.title == "Artists" then
+            local temp = songs
+            songs = artists
+            artists = temp
         end
+
+        create_dir(songs, "songs.lua")
+        create_dir(artists, "artists.lua")
 
         self:UpdateSongs(function(result)
             if result and #result > 0 then
                 for k, dir in pairs(directories) do
-                    if dir.title == "Songs" or dir.title == "Artists" then
-                        for k, song in pairs(songs) do
-                            if song.deleted then
-                                dir:remove(song)
-                            else
-                                dir:add(song)
-                            end
+                    for k, song in pairs(songs) do
+                        if song.deleted then
+                            dir:remove(song)
+                        else
+                            dir:add(song)
                         end
-                        dir:save() --TODO implement this
                     end
+                    dir:save() --TODO
                 end
             end
-            local playlists = create_dir(self.directory:new(), "playlists.lua")
-            table.insert(directories, playlists)
-            callback(directories)
+            callback{artists, search, songs, playlists}
         end)
     end
 end
