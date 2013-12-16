@@ -39,16 +39,32 @@ end
 function LIB:Load(callback, info) --TODO implement callback and info
     self.info = info
 
+    local callback_called = false
+
     --load directories if they have already been saved
     local directories = powow.get_saved_directories(self.class) --TODO implement this
     --create search
-    local search = self.directory:new()
-    search.style = "search"
-    search.items = {
-        create_dir("songs.lua", "search"),
-        create_dir("albums.lua", "search"),
-        create_dir("artists.lua", "search")
-    }
+    local search
+    local query = "eminem crack a bottle"
+    local function search_callback(success, result)
+        if not success then
+            if result.status == 0 then
+                self:Search(query, search_callback)
+            end
+        else
+            search = self.directory:new()
+            search.style = "search"
+            search.items = {
+                create_dir("songs.lua", "search"),
+                create_dir("albums.lua", "search"),
+                create_dir("artists.lua", "search")
+            }
+            if callback_called then
+                self:InsertDirectory(2, search)
+            end
+        end
+    end
+    self:Search(query, search_callback)
     --create playlists
     local playlists = create_dir("playlists.lua")
 
@@ -64,7 +80,15 @@ function LIB:Load(callback, info) --TODO implement callback and info
                 artists:save() --TODO
                 songs:save() --TODO
 
-                callback{artists, search, songs, playlists}
+                directories = {}
+                table.insert(directories, artists)
+                if search then
+                    table.insert(directories, search)
+                end
+                table.insert(directories, songs)
+                table.insert(directories, playlists)
+                callback(directories)
+                callback_called = true
             elseif type(result) == 'string' then
                 callback(result)
             else
@@ -97,7 +121,16 @@ function LIB:Load(callback, info) --TODO implement callback and info
                     dir:save() --TODO
                 end
             end
-            callback{artists, search, songs, playlists}
+
+            directories = {}
+            table.insert(directories, artists)
+            if search then
+                table.insert(directories, search)
+            end
+            table.insert(directories, songs)
+            table.insert(directories, playlists)
+            callback(directories)
+            callback_called = true
         end)
     end
 end
@@ -114,9 +147,6 @@ function LIB:Login(email, password, callback)
     if not password then
         password = self.password
     end
-
-    NSLog("Email: "..email)
-    NSLog("Passw: "..password)
 
     assert(type(email) == "string")
     assert(type(password) == "string")
@@ -201,7 +231,7 @@ function LIB:Search(query, callback, index)
     params['max-results'] = 40
 
     self.session:get(url, params, function(result)
-        if result.failed or result.status ~= 200 then
+        if result.status ~= 200 then
             callback(false, result)
         else
             local json = http.json.decode(result.body)
