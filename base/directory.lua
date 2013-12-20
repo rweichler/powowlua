@@ -14,9 +14,12 @@ function dir:new(o)
     setmetatable(o, self)
     self.__index = function(slf, key)
         if key == "items" and not self[key] then
-            local items = __load_items_from_memory(slf)
-            slf.items = items
-            return items
+            local success = __load_items_from_memory(slf)
+            if success then
+                return slf.items
+            else
+                return self.items
+            end
         end
         return self[key]
     end
@@ -46,6 +49,6 @@ function dir:LoadData(data)
 end
 
 --implemented in C
-dir.save = __save_directory --TODO implement this
+dir.save = __save_directory
 
 return dir

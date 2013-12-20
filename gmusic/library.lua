@@ -1,50 +1,46 @@
 --SHOUT OUT TO SIMON WEBER FOR MAKING THE BEST GOOGLE MUSIC API EVER (which is what this is based on)
 --https://github.com/simon-weber/Unofficial-Google-Music-API/
 
-local powow = require 'powow'
-
 LIB.title = "Google Music"
 LIB.short_title = "GMusic"
 LIB.color = {255,0,255}
-
-LIB.search_order = {
-    "songs",
-    "albums",
-    "artists",
-}
 
 LIB.requires_login = true
 LIB.num_login_fields = 2
 
 LIB.logged_in = false
 
-local function create_dir(dir, path, kind)
-    if type(dir) == "string" then
-        kind = path
-        path = dir
-        dir = self.directory:new()
-    end
-    if not kind then
-        kind = "directories"
-    end
+local function generate_create_dir(self)
+    return function (dir, path, kind)
+        if type(dir) == "string" then
+            kind = path
+            path = dir
+            dir = self.directory:new()
+        end
+        if not kind then
+            kind = "directories"
+        end
 
-    path = bundle_path..self.class.."/"..kind.."/"..path
-    local env = {DIR = dir}
-    setmetatable(env, {__index=_ENV})
-    local f = loadfile(path, "bt", env)
-    f()
-    return dir
+        path = bundle_path..self.class.."/"..kind.."/"..path
+        local env = {DIR = dir}
+        setmetatable(env, {__index=_ENV})
+        local f = loadfile(path, "bt", env)
+        f()
+        return dir
+    end
 end
 
 function LIB:Load(callback, info) --TODO implement callback and info
-    self.info = info
+    self.info = info or {}
+
+    local create_dir = generate_create_dir(self)
 
     local callback_called = false
 
     --load directories if they have already been saved
-    local directories = powow.get_saved_directories(self.class) --TODO implement this
+    local directories = self:GetSavedDirectories()
     --create search
-    local search
+    local search = nil
     local query = "eminem crack a bottle"
     local function search_callback(success, result)
         if not success then
@@ -54,13 +50,15 @@ function LIB:Load(callback, info) --TODO implement callback and info
         else
             search = self.directory:new()
             search.style = "search"
+            search.title = "Search"
+            search.icon = "magnifier@2x.png"
             search.items = {
                 create_dir("songs.lua", "search"),
                 create_dir("albums.lua", "search"),
                 create_dir("artists.lua", "search")
             }
             if callback_called then
-                self:InsertDirectory(2, search)
+                self:InsertDirectory(2, search) --TODO implement this
             end
         end
     end
@@ -69,27 +67,32 @@ function LIB:Load(callback, info) --TODO implement callback and info
     local playlists = create_dir("playlists.lua")
 
     if not directories or #directories == 0 then
+        print("getsongs")
         self:GetSongs(function(result)
-            if type(result) == table then
+            if type(result) == "table" then
                 local artists = create_dir("artists.lua")
                 local songs = create_dir("songs.lua")
 
-                artists:init(result)
-                songs:init(result)
+                artists.items = artists:init(result)
+                songs.items = songs:init(result)
 
                 artists:save() --TODO
                 songs:save() --TODO
 
-                directories = {}
+                local directories = {}
                 table.insert(directories, artists)
                 if search then
                     table.insert(directories, search)
                 end
                 table.insert(directories, songs)
                 table.insert(directories, playlists)
+                NSLog("num directories: "..#directories)
+                NSLog("Artists title: "..artists.title)
+                NSLog("Songs title: "..songs.title)
+                NSLog("Playlists title: "..playlists.title)
                 callback(directories)
                 callback_called = true
-            elseif type(result) == 'string' then
+            elseif type(result) == "string" then
                 callback(result)
             else
                 callback(false)
@@ -97,6 +100,7 @@ function LIB:Load(callback, info) --TODO implement callback and info
         end)
     else
         --directories just contains the songs (dir.items), but we still want them to have their special functions, so we will initialize them this way
+        print('else')
         local songs = directories[1]
         local artists = directories[2]
         if songs.title == "Artists" then
@@ -220,9 +224,7 @@ end
 
 LIB.sj_url = "https://www.googleapis.com/sj/v1.1/"
 
-function LIB:Search(query, callback, index)
-    local search = self.searches[index]
-
+function LIB:Search(query, callback, search)
     local url = self.sj_url.."query"
 
     local params = {
@@ -416,7 +418,7 @@ function LIB:GetSongs(callback)
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
             else
                 self.info.lastUpdated = os.time()
-                callback(response.status)
+                callback(self.songs)
                 return --if there's no continuation token, then we're done
             end
         end

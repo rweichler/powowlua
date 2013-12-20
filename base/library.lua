@@ -75,4 +75,6 @@ function lib:Load(callback)
     end
 end
 
+lib.GetSavedDirectories = __get_saved_directories
+
 return lib
