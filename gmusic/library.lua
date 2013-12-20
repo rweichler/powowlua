@@ -11,8 +11,9 @@ LIB.num_login_fields = 2
 LIB.logged_in = false
 
 local function generate_create_dir(self)
-    return function (dir, path, kind)
+    return function (dir, path, kind, env_var)
         if type(dir) == "string" then
+            env_var = kind
             kind = path
             path = dir
             dir = self.directory:new()
@@ -20,9 +21,13 @@ local function generate_create_dir(self)
         if not kind then
             kind = "directories"
         end
+        if not env_var then
+            env_var = "DIR"
+        end
 
         path = bundle_path..self.class.."/"..kind.."/"..path
-        local env = {DIR = dir}
+        local env = {}
+        env[env_var] = dir
         setmetatable(env, {__index=_ENV})
         local f = loadfile(path, "bt", env)
         f()
@@ -85,6 +90,7 @@ function LIB:Load(callback, info) --TODO implement callback and info
                 end
                 table.insert(directories, songs)
                 table.insert(directories, playlists)
+                self.directories = directories
                 callback(directories)
                 callback_called = true
             elseif type(result) == "string" then
@@ -127,6 +133,7 @@ function LIB:Load(callback, info) --TODO implement callback and info
             end
             table.insert(directories, songs)
             table.insert(directories, playlists)
+            self.directories = directories
             callback(directories)
             callback_called = true
         --end)

@@ -56,16 +56,12 @@ function lib:new(o)
     return o
 end
 
-function lib:Search(query, callback, index)
-    if not self.searches then
-        callback{}
+function lib:Search(query, callback, search)
+    local search = self.searches[index]
+    if search.Search then
+        search:Search(query, callback)
     else
-        local search = self.searches[index]
-        if search.Search then
-            search:Search(query, callback)
-        else
-            callback{}
-        end
+        callback{}
     end
 end
 
