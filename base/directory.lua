@@ -9,20 +9,22 @@ dir.title = nil
 dir.subtitle = nil
 dir.icon = nil
 
-function dir:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = function(slf, key)
-        if key == "items" and not self[key] then
-            local success = __load_items_from_memory(slf)
+local generate_index = function(base)
+    return function(self, key)
+        if key == "items" and not base[key] then
+            local success = __load_items_from_memory(self)
             if success then
-                return slf.items
-            else
                 return self.items
             end
         end
-        return self[key]
+        return base[key]
     end
+end
+
+function dir:new(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = generate_index(self)
 
     return o
 end

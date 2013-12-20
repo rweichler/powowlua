@@ -67,7 +67,6 @@ function LIB:Load(callback, info) --TODO implement callback and info
     local playlists = create_dir("playlists.lua")
 
     if not directories or #directories == 0 then
-        print("getsongs")
         self:GetSongs(function(result)
             if type(result) == "table" then
                 local artists = create_dir("artists.lua")
@@ -86,10 +85,6 @@ function LIB:Load(callback, info) --TODO implement callback and info
                 end
                 table.insert(directories, songs)
                 table.insert(directories, playlists)
-                NSLog("num directories: "..#directories)
-                NSLog("Artists title: "..artists.title)
-                NSLog("Songs title: "..songs.title)
-                NSLog("Playlists title: "..playlists.title)
                 callback(directories)
                 callback_called = true
             elseif type(result) == "string" then
@@ -100,7 +95,6 @@ function LIB:Load(callback, info) --TODO implement callback and info
         end)
     else
         --directories just contains the songs (dir.items), but we still want them to have their special functions, so we will initialize them this way
-        print('else')
         local songs = directories[1]
         local artists = directories[2]
         if songs.title == "Artists" then
@@ -112,7 +106,7 @@ function LIB:Load(callback, info) --TODO implement callback and info
         create_dir(songs, "songs.lua")
         create_dir(artists, "artists.lua")
 
-        self:UpdateSongs(function(result)
+        --self:UpdateSongs(function(result)
             if result and #result > 0 then
                 for k, dir in pairs(directories) do
                     for k, song in pairs(songs) do
@@ -126,7 +120,7 @@ function LIB:Load(callback, info) --TODO implement callback and info
                 end
             end
 
-            directories = {}
+            local directories = {}
             table.insert(directories, artists)
             if search then
                 table.insert(directories, search)
@@ -135,7 +129,7 @@ function LIB:Load(callback, info) --TODO implement callback and info
             table.insert(directories, playlists)
             callback(directories)
             callback_called = true
-        end)
+        --end)
     end
 end
 
@@ -317,7 +311,6 @@ function LIB:AddAllAccessSongs(songs, callback)
     session:post(url, body, function(response)
         --{'mutate_response': [{'response_code': 'OK', 'id': '17f9fff3-ffc5-3141-abf2-0c9b588cbf77', 'client_id': ''}]}
         if not response.failed and response.status == 200 then
-            NSLog(response.body)
             local ids = {}
             local json = http.json.decode(response.body)
             for k,v in pairs(json.mutate_response) do
@@ -349,9 +342,10 @@ function LIB:UpdateSongs(callback)
         self.info.lastUpdated = os.time()
 
         local str = string.match(response.body, "\"playlist\":(.*)}%);\n")
-        if not str then callback(nil) return end
+        if true or not str then callback(nil) return end
 
-        local songs = json.decode(str)
+
+        local songs = http.json.decode(str)
         for k,v in pairs(songs) do
             local song = self.song:new()
             song:SetInfo(v)
