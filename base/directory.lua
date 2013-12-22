@@ -1,15 +1,15 @@
-local dir = {}
-dir.type = "directory"
-dir.class = "base"
+local DIR = {}
+DIR.type = "directory"
+DIR.class = "base"
 
-dir.__objc_classname = "LuaDirectory"
+DIR.__objc_classname = "LuaDirectory"
 
-dir.library = nil
-dir.header = "All Songs"
+DIR.library = nil
+DIR.header = "All Songs"
 
-dir.title = nil
-dir.subtitle = nil
-dir.icon = nil
+DIR.title = nil
+DIR.subtitle = nil
+DIR.icon = nil
 
 local generate_index = function(base)
     return function(self, key)
@@ -23,7 +23,7 @@ local generate_index = function(base)
     end
 end
 
-function dir:new(o)
+function DIR:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = generate_index(self)
@@ -31,28 +31,19 @@ function dir:new(o)
     return o
 end
 
-function dir:update(indexes)
-    self.container:update(indexes)
-end
---[[
---implement this method only if it depends on the contents of LIB:Load
-function dir:init(items)
-    return items
-end
-]]
-function dir:loaditems(callback)
+function DIR:loaditems(callback)
     callback(nil)
 end
 
-function dir:SaveData()
+function DIR:SaveData()
     return self.image_url
 end
 
-function dir:LoadData(data)
+function DIR:LoadData(data)
     self.image_url = data
 end
 
 --implemented in C
-dir.save = __save_directory
+DIR.save = __save_directory
 
-return dir
+return DIR

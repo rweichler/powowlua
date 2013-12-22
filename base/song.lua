@@ -1,13 +1,13 @@
-local song = {}
-song.type = "song"
-song.class = "base"
+local SONG = {}
+SONG.type = "song"
+SONG.class = "base"
 
-song.__objc_classname = "LuaSong"
+SONG.__objc_classname = "LuaSong"
 
-song.can_cache = false
-song.filetype = "mp3"
+SONG.can_cache = false
+SONG.filetype = "mp3"
 
-function song:new(o)
+function SONG:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
@@ -17,15 +17,15 @@ function song:new(o)
     return o
 end
 
-function song:SetInfo(info)
+function SONG:SetInfo(info)
     self.info = info
 end
 
-function song:StreamURL(callback)
+function SONG:StreamURL(callback)
     callback(self.info.stream_url)
 end
 
-function song:ArtworkURL(callback)
+function SONG:ArtworkURL(callback)
     callback(self.info.artwork_url)
 end
 
@@ -37,4 +37,4 @@ function SONG:LoadData(data)
     end
 end
 
-return song
+return SONG

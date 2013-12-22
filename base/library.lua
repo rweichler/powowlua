@@ -1,21 +1,21 @@
-local lib = {}
-lib.type = "library"
-lib.class = "base"
+local LIB = {}
+LIB.type = "library"
+LIB.class = "base"
 
-lib.__objc_classname = "LuaLibrary"
+LIB.__objc_classname = "LuaLibrary"
 
-lib.title = "Library"
-lib.short_title = lib.title
-lib.icon = "icon.png"
-lib.requires_login = false
-lib.num_login_fields = 0
-lib.song = nil
-lib.color = {0,0,0}
-lib.background_color = {0,0,0}
+LIB.title = "Library"
+LIB.short_title = LIB.title
+LIB.icon = "icon.png"
+LIB.requires_login = false
+LIB.num_login_fields = 0
+LIB.song = nil
+LIB.color = {0,0,0}
+LIB.background_color = {0,0,0}
 
---lib.directory_names = nil
+--LIB.directory_names = nil
 
-function lib:new(o)
+function LIB:new(o)
     o = o or {}
     setmetatable(o, self)
     self.__index = self
@@ -24,13 +24,13 @@ function lib:new(o)
     if o.class then
         --song
         local song = dofile(bundle_path.."base/song.lua")
-        SONG = {}
         local path = bundle_path..o.class.."/song.lua"
         if io.open(path) then
+            local old_song = SONG
+            SONG = {}
             dofile(path)
-            for k,v in pairs(SONG) do
-                song[k] = v
-            end
+            song = song:new(SONG)
+            SONG = old_song
         end
 
         song.class = o.class
@@ -39,13 +39,13 @@ function lib:new(o)
 
         --directory
         local dir = dofile(bundle_path.."base/directory.lua")
-        DIR = {}
         local path = bundle_path..o.class.."/directory.lua"
         if io.open(path) then
+            local old_dir = DIR
+            DIR = {}
             dofile(path)
-            for k,v in pairs(DIR) do
-                dir[k] = v
-            end
+            dir = dir:new(DIR)
+            DIR = old_dir
         end
         dir.class = o.class
         dir.library = o
@@ -58,7 +58,7 @@ function lib:new(o)
     return o
 end
 
-function lib:Search(query, callback, search)
+function LIB:Search(query, callback, search)
     if type(search.Search) == "function" then
         search:Search(query, callback)
     else
@@ -66,12 +66,12 @@ function lib:Search(query, callback, search)
     end
 end
 
-function lib:Load(callback)
+function LIB:Load(callback)
     if type(callback) == "function" then
         callback(false)
     end
 end
 
-lib.GetSavedDirectories = __get_saved_directories
+LIB.GetSavedDirectories = __get_saved_directories
 
-return lib
+return LIB
