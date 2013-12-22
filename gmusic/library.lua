@@ -55,7 +55,7 @@ function LIB:Load(callback, info) --TODO implement callback and info
         else
             search = self.directory:new()
             search.style = "search"
-            search.title = "Search"
+            search.title = "Search All Access"
             search.icon = "magnifier@2x.png"
             search.items = {
                 create_dir("songs.lua", "search"),

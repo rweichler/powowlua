@@ -57,8 +57,7 @@ function lib:new(o)
 end
 
 function lib:Search(query, callback, search)
-    local search = self.searches[index]
-    if search.Search then
+    if type(search.Search) == "function" then
         search:Search(query, callback)
     else
         callback{}

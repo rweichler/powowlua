@@ -3,13 +3,13 @@ LIB.title = "SoundCloud"
 LIB.short_title = "SCloud"
 LIB.color = {255, 77, 25}
 
-local function generate_create_dir(base)
+local function generate_create_dir(self)
     return function (dir, path, kind, env_var)
-        if type(dir) == "string" then
+        if not dir or type(dir) == "string" then
             env_var = kind
             kind = path
             path = dir
-            dir = base:new()
+            dir = self.directory:new()
         end
         if not kind then
             kind = "directories"
@@ -30,7 +30,7 @@ local function generate_create_dir(base)
 end
 
 function LIB:Load(callback)
-    local create_dir = generate_create_dir(self.directory)
+    local create_dir = generate_create_dir(self)
     local search = create_dir()
     search.style = "search"
     search.title = "Search"
