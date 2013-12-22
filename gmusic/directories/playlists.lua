@@ -88,7 +88,13 @@ function DIR:loaditems(callback)
                             end)
 
                         else
-                            local items = self.library.directories['songs'].items
+                            local items = nil
+                            for k,dir in pairs(self.library.directories) do
+                                if dir.title == "Songs" then
+                                    items = dir.items
+                                    break
+                                end
+                            end
                             for k,song in pairs(items) do
                                 if song.id == id then
                                     table.insert(songs, song)
