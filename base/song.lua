@@ -2,9 +2,10 @@ local song = {}
 song.type = "song"
 song.class = "base"
 
+song.__objc_classname = "LuaSong"
+
 song.can_cache = false
 song.filetype = "mp3"
-song.library = nil
 
 function song:new(o)
     o = o or {}
@@ -21,20 +22,19 @@ function song:SetInfo(info)
 end
 
 function song:StreamURL(callback)
-    if callback then
-        callback(self.info.stream_url)
-    end
+    callback(self.info.stream_url)
 end
 
 function song:ArtworkURL(callback)
-    if callback then
-        callback(self.info.artwork_url)
+    callback(self.info.artwork_url)
+end
+
+function SONG:LoadData(data)
+    if not data or string.len(data) == 0 then return end
+    data = http.json.decode(data)
+    for k,v in pairs(data) do
+        self[k] = v
     end
 end
-
-function song:Serialize()
-    return self.info
-end
-
 
 return song

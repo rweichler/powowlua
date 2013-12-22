@@ -41,9 +41,3 @@ function SONG:SaveData()
         album_art_url = self.album_art_url,
     }
 end
-
-function SONG:LoadData(data)
-    local result = http.json.decode(data)
-    self.stream_url = result.stream_url
-    self.album_art_url = result.album_art_url
-end

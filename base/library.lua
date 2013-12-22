@@ -2,6 +2,8 @@ local lib = {}
 lib.type = "library"
 lib.class = "base"
 
+lib.__objc_classname = "LuaLibrary"
+
 lib.title = "Library"
 lib.short_title = lib.title
 lib.icon = "icon.png"

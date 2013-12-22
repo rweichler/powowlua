@@ -2,6 +2,8 @@ local dir = {}
 dir.type = "directory"
 dir.class = "base"
 
+dir.__objc_classname = "LuaDirectory"
+
 dir.library = nil
 dir.header = "All Songs"
 

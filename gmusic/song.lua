@@ -54,13 +54,6 @@ function SONG:SaveData()
     }
 end
 
-function SONG:LoadData(data)
-    local result = http.json.decode(data)
-    self.album_art_url = result.album_art_url
-    self.duration = result.duration
-    self.track_number = result.track_number
-end
-
 function SONG:StreamURL(callback)
 
     if not self.library.logged_in then
