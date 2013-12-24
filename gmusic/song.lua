@@ -91,7 +91,7 @@ function SONG:StreamURL(callback)
     local key = '27f7313e-f75d-445a-ac99-56386a5fe879'
     local salt = 'djvk4idpqo93' --this should be a generated random string of characters but im too lazy and decided to just mash my keyboard.
 
-    local sig = crypto.hmac.digest(crypto.hmac.sha1, key, id..salt)
+    local sig = crypto.hmac.sha1(key, id..salt)
     sig = string.sub(sig, 1, #sig - 1) --get rid of = at the end
     --replace + and / with - and _ respectively (for URL encode)
     sig = string.gsub(sig, "[+|/]", function(char)
