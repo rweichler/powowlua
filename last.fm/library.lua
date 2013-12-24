@@ -4,6 +4,7 @@ LIB.url = "https://ws.audioscrobbler.com/2.0/?format=json"
 LIB.api_key = "4f45357ba82e435404fbb486ddb12b97"
 LIB.api_secret = nil --gotta figure out a way to include this without showing the source code.....
 
+--http://www.last.fm/api/show/auth.getMobileSession
 local secret = LIB.api_secret
 local api_key = LIB.api_key
 local function sign(params)
@@ -74,11 +75,16 @@ local function send_song(self, song, method, params)
     end)
 end
 
+--SCOBBLING
+--http://www.last.fm/api/scrobbling
+
+--http://www.last.fm/api/show/track.updateNowPlaying
 function LIB:UpdateNowPlaying(song)
     song.started_playing = os.time()
     send_song(self, song, "track.updateNowPlaying")
 end
 
+--http://www.last.fm/api/show/track.scrobble
 function LIB:Scrobble(song)
     params = {}
     params.timestamp = song.started_playing
