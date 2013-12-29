@@ -16,6 +16,9 @@ local function generate_create_dir(self)
             env_var = kind
             kind = path
             path = dir
+            dir = nil
+        end
+        if not dir then
             dir = self.directory:new()
         end
         if not kind then
@@ -35,8 +38,10 @@ local function generate_create_dir(self)
     end
 end
 
-function LIB:Load(callback, info) --TODO implement callback and info
-    self.info = info or {}
+function LIB:Load(callback, info) --TODO implement info
+    if info then
+        self.last_update = tonumber(info)
+    end
 
     local create_dir = generate_create_dir(self)
 
@@ -80,8 +85,8 @@ function LIB:Load(callback, info) --TODO implement callback and info
                 artists.items = artists:init(result)
                 songs.items = songs:init(result)
 
-                artists:save() --TODO
-                songs:save() --TODO
+                artists:save("artists")
+                songs:save("songs")
 
                 local directories = {}
                 table.insert(directories, artists)
@@ -101,12 +106,15 @@ function LIB:Load(callback, info) --TODO implement callback and info
         end)
     else
         --directories just contains the songs (dir.items), but we still want them to have their special functions, so we will initialize them this way
-        local songs = directories[1]
-        local artists = directories[2]
-        if songs.title == "Artists" then
-            local temp = songs
-            songs = artists
-            artists = temp
+        local songs = nil
+        local artists = nil
+
+        for k,v in pairs(directories) do
+            if v.id == "songs" then
+                songs = v
+            elseif v.id == "artists" then
+                artists = v
+            end
         end
 
         create_dir(songs, "songs.lua")
@@ -335,6 +343,11 @@ function LIB:AddAllAccessSongs(songs, callback)
 
 end
 
+function LIB:UpdateTime()
+    self.last_update = os.time()
+    self:save(tostring(self.last_update))
+end
+
 function LIB:UpdateSongs(callback)
     local url = "https://play.google.com/music/services/streamingloadalltracks"
     local params = {
@@ -345,8 +358,7 @@ function LIB:UpdateSongs(callback)
     }
 
     self.session:get(url, params, function(response)
-
-        self.info.lastUpdated = os.time()
+        self:UpdateTime()
 
         local str = string.match(response.body, "\"playlist\":(.*)}%);\n")
         if true or not str then callback(nil) return end
@@ -418,7 +430,7 @@ function LIB:GetSongs(callback)
             if json.continuationToken then
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
             else
-                self.info.lastUpdated = os.time()
+                self:UpdateTime()
                 callback(self.songs)
                 return --if there's no continuation token, then we're done
             end

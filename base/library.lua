@@ -73,5 +73,6 @@ function LIB:Load(callback)
 end
 
 LIB.GetSavedDirectories = __get_saved_directories
+LIB.save = __save_library
 
 return LIB
