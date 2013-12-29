@@ -45,5 +45,6 @@ end
 
 --implemented in C
 DIR.save = __save_directory
+DIR.load = __load_items_from_memory
 
 return DIR

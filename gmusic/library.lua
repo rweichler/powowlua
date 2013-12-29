@@ -110,6 +110,7 @@ function LIB:Load(callback, info) --TODO implement info
         local artists = nil
 
         for k,v in pairs(directories) do
+            v:load()
             if v.id == "songs" then
                 songs = v
             elseif v.id == "artists" then
