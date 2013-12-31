@@ -38,7 +38,7 @@ local function generate_create_dir(self)
     end
 end
 
-function LIB:Load(callback, info) --TODO implement info
+function LIB:Load(callback, info)
     if info then
         self.last_update = tonumber(info)
     end
@@ -68,7 +68,7 @@ function LIB:Load(callback, info) --TODO implement info
                 create_dir("artists.lua", "search")
             }
             if callback_called then
-                self:InsertDirectory(2, search) --TODO implement this
+                self:InsertDirectory(search, 2)
             end
         end
     end
@@ -131,7 +131,7 @@ function LIB:Load(callback, info) --TODO implement info
                             dir:add(song)
                         end
                     end
-                    dir:save() --TODO
+                    dir:save()
                 end
             end
 

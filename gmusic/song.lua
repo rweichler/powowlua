@@ -31,9 +31,7 @@ function SONG:SetInfo(info)
     if string.sub(self.id, 1, 1) == 'T' then --all access
         self.options = {}
         self.options['Add to Library'] = function(callback)
-            local func = self.library.AddAllAccessSongs
-            NSLog(type(func))
-            func(self.library, self, callback)
+            self.library:AddAllAccessSongs(self, callback)
         end
     end
     --album art

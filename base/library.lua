@@ -72,6 +72,7 @@ function LIB:Load(callback)
     end
 end
 
+LIB.InsertDirectory = __insert_directory_into_library
 LIB.GetSavedDirectories = __get_saved_directories
 LIB.save = __save_library
 
