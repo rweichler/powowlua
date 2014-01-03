@@ -5,7 +5,6 @@ LIB.title = "Google Music"
 LIB.short_title = "GMusic"
 LIB.color = {255,0,255}
 
-LIB.requires_login = true
 LIB.num_login_fields = 2
 
 LIB.logged_in = false
@@ -39,9 +38,45 @@ local function generate_create_dir(self)
 end
 
 function LIB:Load(callback, info)
-    if info then
-        self.last_update = tonumber(info)
+    if type(info) == "string" then
+        for k,v in pairs(http.json.decode(info)) do
+            self[k] = v
+        end
     end
+
+    local function login(username, password, success)
+        if not username then
+            login_popup(login)
+            return
+        elseif not success then
+            callback(false)
+            return
+        end
+
+        callback("Logging in")
+
+        self:Login(username, password, function(success, status, message)
+            if not success then
+                --TODO handle failure
+                popup("FUCKED UP, KILL APP")
+                callback(false)
+            else
+                if self.username ~= username or self.password ~= password then
+                    self.username = username
+                    self.password = password
+                    self:SaveEverything()
+                end
+
+                callback("Loading")
+                self:LoadDirectories(callback)
+            end
+        end)
+    end
+
+    login(self.username, self.password, true)
+end
+
+function LIB:LoadDirectories(callback)
 
     local create_dir = generate_create_dir(self)
 
@@ -346,7 +381,15 @@ end
 
 function LIB:UpdateTime()
     self.last_update = os.time()
-    self:save(tostring(self.last_update))
+    self:SaveEverything()
+end
+
+function LIB:SaveEverything()
+    self:save(http.json.encode{
+        last_update = self.last_update,
+        username = self.username,
+        password = self.password
+    })
 end
 
 function LIB:UpdateSongs(callback)
