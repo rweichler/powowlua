@@ -57,9 +57,14 @@ function LIB:Load(callback, info)
 
         self:Login(username, password, function(success, status, message)
             if not success then
-                --TODO handle failure
-                popup("FUCKED UP, KILL APP")
-                callback(false)
+                if status == 403 then
+                    login_popup({
+                        title = "Wrong username/password!",
+                        message = "Please try again."
+                    }, login)
+                else
+                    popup("FUCKED UP!! KILL THE APP")
+                end
             else
                 if self.username ~= username or self.password ~= password then
                     self.username = username
