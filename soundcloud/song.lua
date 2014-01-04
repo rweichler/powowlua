@@ -7,6 +7,18 @@ local private_key = private_key or dofile(path)
 SONG.can_cache = true
 SONG.album = "SoundCloud"
 
+function SONG:new(o)
+    o = self.super.new(self, o)
+    o.options = o.options or {}
+    o.options['Save'] = o.options['Save'] or function(callback)
+        o:download(function()
+            o.options['Save'] = nil
+        end)
+        callback(true)
+    end
+    return o
+end
+
 function SONG:StreamURL(callback)
     callback(self.stream_url.."?client_id="..private_key)
 end

@@ -9,8 +9,8 @@ SONG.filetype = "mp3"
 
 function SONG:new(o)
     o = o or {}
-    setmetatable(o, self)
-    self.__index = self
+    setmetatable(o, {__index=self})
+    o.super = self
 
     o.info = o.info or {}
 
@@ -36,5 +36,7 @@ function SONG:LoadData(data)
         self[k] = v
     end
 end
+
+SONG.download = __download_song
 
 return SONG

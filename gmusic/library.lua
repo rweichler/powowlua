@@ -44,7 +44,11 @@ function LIB:Load(callback, info)
 
     local function login(username, password, success)
         if not username then
-            login_popup(login)
+            login_popup({
+                title = "Login to Google Music",
+                username_placeholder = "Username or Email"
+            },
+            login)
             return
         elseif not success then
             callback(false)

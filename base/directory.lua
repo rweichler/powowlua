@@ -25,8 +25,8 @@ end
 
 function DIR:new(o)
     o = o or {}
-    setmetatable(o, self)
-    self.__index = generate_index(self)
+    setmetatable(o, {__index=generate_index(self)})
+    o.super = self
 
     return o
 end

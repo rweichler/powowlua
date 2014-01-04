@@ -8,9 +8,30 @@ local function decode(s)
     return cgi
 end
 
+function SONG:new(o)
+    o = self.super.new(self, o)
+    o.options = o.options or {}
+    o.options['Save'] = o.options['Save'] or function(callback)
+        local function download(...)
+            o:download(function()
+                o.options['Save'] = nil
+            end)
+            callback(...)
+        end
+        if string.sub(o.id, 1, 1) == 'T' then
+            o.library:AddAllAccessSongs(o, download)
+        else
+            download(true)
+        end
+    end
+
+    return o
+end
+
 function SONG:SetInfo(info)
-    if type(info) == "nil" then
-        NSLog("WHAT THE FUCK INFO IS NIL")
+    if type(info) ~= "table" then
+        NSLog("WHAT THE FUCK INFO IS "..string.upper(type(info)))
+        return
     end
     self.info = info
     self.artist = info.artist or self.artist
@@ -29,7 +50,7 @@ function SONG:SetInfo(info)
     end
     --tooltip stuff
     if string.sub(self.id, 1, 1) == 'T' then --all access
-        self.options = {}
+        self.options = self.options or {}
         self.options['Add to Library'] = function(callback)
             self.library:AddAllAccessSongs(self, callback)
         end

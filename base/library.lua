@@ -17,8 +17,8 @@ LIB.background_color = {0,0,0}
 
 function LIB:new(o)
     o = o or {}
-    setmetatable(o, self)
-    self.__index = self
+    setmetatable(o, {__index=self})
+    o.super = self
 
     --o.directories = {}
     if o.class then
