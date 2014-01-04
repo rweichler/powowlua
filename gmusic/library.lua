@@ -11,28 +11,26 @@ LIB.logged_in = false
 
 local function generate_create_dir(self)
     return function (dir, path, kind, env_var)
-        if type(dir) == "string" then
+        if not dir or type(dir) == "string" then
             env_var = kind
             kind = path
             path = dir
-            dir = nil
-        end
-        if not dir then
             dir = self.directory:new()
         end
         if not kind then
             kind = "directories"
-        end
-        if not env_var then
             env_var = "DIR"
         end
-
-        path = bundle_path..self.class.."/"..kind.."/"..path
-        local env = {}
-        env[env_var] = dir
-        setmetatable(env, {__index=_ENV})
-        local f = loadfile(path, "bt", env)
-        f()
+        if not env_var then
+            env_var = string.upper(kind)
+        end
+        if path then
+            path = bundle_path..self.class.."/"..kind.."/"..path
+            local env = {}
+            env[env_var] = dir
+            setmetatable(env, {__index=_ENV})
+            loadfile(path, "bt", env)()
+        end
         return dir
     end
 end
