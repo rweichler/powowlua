@@ -23,22 +23,19 @@ function SONG:StreamURL(callback)
     --for some reason there's a bug in the soundcloud API that causes the stream URL to not work sometimes
     --this is an elaborate fix
     local url = nil
-    local request_type = nil
     if self.stream_failed then
         if self.download_failed or not self.download_url then
             popup("There is something wrong with this song. Sorrry :(")
             return
         else
             url = self.download_url
-            request_type = "GET"
         end
     else
         url = self.stream_url
-        request_type = "HEAD"
     end
     url = url.."?client_id="..private_key
 
-    http.session:request(request_type, url, "", function(result)
+    http.session:head(url, "", function(result)
         if result.failed and result.status ~= 0 then
             if self.stream_failed then
                 self.download_failed = true
