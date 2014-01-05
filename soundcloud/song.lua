@@ -20,7 +20,38 @@ function SONG:new(o)
 end
 
 function SONG:StreamURL(callback)
-    callback(self.stream_url.."?client_id="..private_key)
+    --for some reason there's a bug in the soundcloud API that causes the stream URL to not work sometimes
+    --this is an elaborate fix
+    local url = nil
+    local request_type = nil
+    if self.stream_failed then
+        if self.download_failed or not self.download_url then
+            popup("There is something wrong with this song. Sorrry :(")
+            return
+        else
+            url = self.download_url
+            request_type = "GET"
+        end
+    else
+        url = self.stream_url
+        request_type = "HEAD"
+    end
+    url = url.."?client_id="..private_key
+
+    http.session:request(request_type, url, "", function(result)
+        if result.failed and result.status ~= 0 then
+            if self.stream_failed then
+                self.download_failed = true
+                self:StreamURL(callback)
+            else
+                self.stream_failed = true
+                NSLog("Stream failed, trying download URL if it exists")
+                self:StreamURL(callback)
+            end
+        else
+            callback(url)
+        end
+    end)
 end
 
 function SONG:ArtworkURL(callback)
@@ -37,6 +68,9 @@ function SONG:SetInfo(info)
     self.id = info.id
     self.subtitle = self.artist.." - "..self.album
     self.stream_url = info.stream_url
+    if info.downloadable then
+        self.download_url = info.download_url
+    end
     local url
     if type(self.info.artwork_url) == "string" then
         url = self.info.artwork_url
@@ -48,8 +82,11 @@ function SONG:SetInfo(info)
 end
 
 function SONG:SaveData()
-    return http.json.encode{
+    local data = {
         stream_url = self.stream_url,
         album_art_url = self.album_art_url,
+        download_url = self.download_url
     }
+
+    return http.json.encode(data)
 end
