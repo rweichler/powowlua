@@ -6,7 +6,7 @@ function DIR:init(songs)
     local start = os.clock()
     --alphabetize that shit
     table.sort(songs, function(a, b)
-        return a.info.titleNorm < b.info.titleNorm
+        return string.lower(a.title) < string.lower(b.title)
     end)
 
     local result = {}

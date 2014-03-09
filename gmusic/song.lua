@@ -34,9 +34,9 @@ function SONG:SetInfo(info)
         return
     end
     self.info = info
-    self.artist = info.artist or self.artist
-    self.title = info.title or self.title
-    self.album = info.album or self.album
+    self.artist = info.artist or self.artist or ""
+    self.title = info.title or self.title or ""
+    self.album = info.album or self.album or ""
     if info.id then
         self.id = info.id
     elseif info.nid then

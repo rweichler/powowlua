@@ -143,6 +143,7 @@ function LIB:LoadDirectories(callback)
             elseif type(result) == "string" then
                 callback(result)
             else
+                popup("fuck my life")
                 callback(false)
             end
         end)
@@ -440,11 +441,12 @@ function LIB:GetSongs(callback)
         return
     end
 
-    local url = "https://play.google.com/music/services/loadalltracks"
+    local url = "https://www.googleapis.com/sj/v1.1/trackfeed?alt=json&updated-min=0&include-tracks=true" --"https://play.google.com/music/services/loadalltracks"
 
     local params = {
-        xt = self.session.cookies.xt
+        --xt = self.session.cookies.xt
     }
+    params['max-results'] = 20000
 
     self.songs = nil
 
@@ -454,6 +456,7 @@ function LIB:GetSongs(callback)
     local function handle_data(response)
         if response then
             if response.status ~= 200 then
+                popup(""..response.status)
                 callback(response.status)
                 return
             end
@@ -471,12 +474,17 @@ function LIB:GetSongs(callback)
                     table.insert(self.songs, song)
                 end
             else
-                self.songs = json.playlist
+                self.songs = json.playlist or json.data.items
                 for k,v in pairs(self.songs) do
                     local song = self.song:new()
                     song:SetInfo(v)
                     self.songs[k] = song
                 end
+                local concat = ""
+                for k,v in pairs(self.songs[1]) do
+                    concat = concat.."song["..k.."] = "..tostring(v).."; "
+                end
+                NSLog("songs: "..concat)
             end
             if json.continuationToken then
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
@@ -486,7 +494,10 @@ function LIB:GetSongs(callback)
                 return --if there's no continuation token, then we're done
             end
         end
-        self.session:post(url, params, handle_data)
+        local old = self.session.headers['Content-Type']
+        self.session.headers['Content-Type'] = 'application/json'
+        self.session:post(url, '{"max-results": "20000"}', handle_data)
+        self.session.headers['Content-Type'] = old
     end
 
     handle_data()
