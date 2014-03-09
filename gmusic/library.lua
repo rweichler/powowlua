@@ -480,11 +480,6 @@ function LIB:GetSongs(callback)
                     song:SetInfo(v)
                     self.songs[k] = song
                 end
-                local concat = ""
-                for k,v in pairs(self.songs[1]) do
-                    concat = concat.."song["..k.."] = "..tostring(v).."; "
-                end
-                NSLog("songs: "..concat)
             end
             if json.continuationToken then
                 params['json'] = '{"continuationToken":"'..json.continuationToken..'"}'
