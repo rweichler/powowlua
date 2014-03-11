@@ -12,10 +12,10 @@ function DIR:init(songs)
         local b_album = string.lower(b.album)
         if a_artist == b_artist then
             if a_album == b_album then
-                if not a.info.trackNumber then
-                    return true
-                elseif not b.info.trackNumber then
+                if not b.info.trackNumber then
                     return false
+                elseif not a.info.trackNumber then
+                    return true
                 end
                 return a.info.trackNumber < b.info.trackNumber
             else
